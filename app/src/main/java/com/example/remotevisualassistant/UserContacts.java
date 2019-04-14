@@ -58,6 +58,20 @@ public class UserContacts {
         return false;
     }
 
+    public void deleteContact(int n){
+        clist.remove(n+1);
+        String[] ncnum = contactNumbers.split(";");
+        String[] ncname = contactNames.split(";");
+        contactNames = "";
+        contactNumbers = "";
+        for(int i=0;i<ncnum.length;i++){
+            if(i!=n+1){
+                contactNumbers = contactNumbers+ncnum[i]+";";
+                contactNames = contactNames+ncname[i]+";";
+            }
+        }
+    }
+
     public String getith(int n){
         return clist.get(n+1);
     }

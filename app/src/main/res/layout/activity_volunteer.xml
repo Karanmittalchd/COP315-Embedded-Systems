@@ -285,18 +285,7 @@
         app:layout_constraintStart_toEndOf="@+id/caller_number2"
         app:layout_constraintTop_toBottomOf="@+id/text_name" />
 
-    <ImageButton
-        android:id="@+id/imageButton_refresh_in"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginEnd="15dp"
-        android:background="@android:color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/divider"
-        app:srcCompat="@drawable/ic_refresh" />
-
-    <View
+        <View
         android:id="@+id/divider4"
         android:layout_width="0dp"
         android:layout_height="2dp"
@@ -306,5 +295,21 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ps_volunteer" />
+
+        <CheckBox
+            android:id="@+id/nss_active"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="30dp"
+            android:background="@android:color/white"
+            android:paddingLeft="10dp"
+            android:paddingRight="15dp"
+            android:text="Set Active"
+            android:textColor="@android:color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/textView7"
+            app:layout_constraintTop_toBottomOf="@+id/divider2" />
     </android.support.constraint.ConstraintLayout>
 </android.support.v4.widget.NestedScrollView>

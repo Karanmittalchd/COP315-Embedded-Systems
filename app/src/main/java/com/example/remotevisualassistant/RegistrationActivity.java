@@ -42,9 +42,9 @@ public class RegistrationActivity extends AppCompatActivity {
     private RadioButton rb1, rb2;
     private CheckBox cb;
     private Button signup;
-    private FirebaseAuth mAuth;
-    private String verificationCode;
+    private FirebaseAuth mAuth;;
     private int verificationComplete;
+    boolean verify_flag;
     ProgressDialog pd;
     PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallback;
 
@@ -93,61 +93,41 @@ public class RegistrationActivity extends AppCompatActivity {
             public void onClick(View v) {
                 int f = validate_input_formats();
                 if(f==0){
-                    String phone_num = "+91"+ed3.getText().toString().trim();
-                    PhoneAuthProvider.getInstance().verifyPhoneNumber(phone_num,20, TimeUnit.SECONDS,RegistrationActivity.this,mCallback);
-                    if(verificationComplete==2){
-                        AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity.this);
-                        builder.setTitle("Mobile number verification");
-                        final EditText otp = new EditText(RegistrationActivity.this);
-                        otp.setHint("enter OTP number");
-                        otp.setGravity(Gravity.CENTER);
-                        otp.setInputType(InputType.TYPE_CLASS_NUMBER);
-                        builder.setView(otp);
-                        builder.setCancelable(false);
-                        builder.setPositiveButton(
-                                "verify",
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        String my_otp = otp.getText().toString().trim();
-                                        if(validate_otp(my_otp)){
-                                            continue_registration();
-                                        }
-                                        else{
-                                            build_an_alert("Error","OTP does not match","okay");
-                                        }
-                                    }
-                                }
-                        );
-                        builder.setNegativeButton(
-                                "cancel",
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        signup.setText("Register");
-                                        dialog.cancel();
-                                    }
-                                }
-                        );
-                        builder.setNeutralButton(
-                                "resend",
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        signup.setText("Register");
-                                        dialog.cancel();
-                                    }
-                                }
-                        );
-                        AlertDialog alert1 = builder.create();
-                        alert1.show();
-                    }
-                    else if(verificationComplete==1){
-                        Toast.makeText(RegistrationActivity.this,"Please wait for a few seconds",Toast.LENGTH_SHORT).show();
+                    if(!verify_flag){
+                        String phone_num = "+91"+ed3.getText().toString().trim();
+                        PhoneAuthProvider.getInstance().verifyPhoneNumber(phone_num,20, TimeUnit.SECONDS,RegistrationActivity.this,mCallback);
+                        build_an_alert("Alert: Verifying Mobile number","wait for a few seconds, then click verify","okay");
+                        signup.setText("Verify");
+                        verify_flag=true;
                     }
                     else{
-                        Toast.makeText(RegistrationActivity.this,"Please wait for the sms",Toast.LENGTH_SHORT).show();
-                        //build_an_alert("Connection Error", "Not connected to internet");
+                        if(verificationComplete==2){
+                            AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity.this);
+                            builder.setTitle("Mobile number verification");
+                            builder.setMessage("Success, press continue");
+                            builder.setCancelable(false);
+                            builder.setPositiveButton(
+                                    "continue",
+                                    new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            continue_registration();
+                                        }
+                                    }
+                            );
+                            AlertDialog alert1 = builder.create();
+                            alert1.show();
+                        }
+                        else if(verificationComplete==1){
+                            build_an_alert("Verifying mobile number","please wait for sms alert","okay");
+                            //Toast.makeText(RegistrationActivity.this,"Please wait for a few seconds",Toast.LENGTH_SHORT).show();
+                        }
+                        else{
+//                        Toast.makeText(RegistrationActivity.this,"Please wait for the sms",Toast.LENGTH_SHORT).show();
+                            build_an_alert("Verification unsuccessful", "Unable to reach number provided, check internet connectivity","okay");
+                            signup.setText("Register");
+                            verify_flag=false;
+                        }
                     }
                 }
                 else if(f==1){
@@ -262,12 +242,18 @@ public class RegistrationActivity extends AppCompatActivity {
                     pd.dismiss();
                     if(task.getException().getMessage().startsWith("A network error")){
                         build_an_alert("Error", "No Internet Connectivity","okay");
+                        signup.setText("Register");
+                        verify_flag=false;
                     }
                     else if(task.getException().getMessage().startsWith("The email address")){
-                        build_an_alert("Error", "Email id already in use","okay");
+                        build_an_alert("Critical Error", "Email id already in use","okay");
+                        signup.setText("Register");
+                        verify_flag=false;
                     }
                     else{
                         build_an_alert("Fatal Error",task.getException().getMessage(),"okay");
+                        signup.setText("Register");
+                        verify_flag=false;
                     }
                     //Toast.makeText(RegistrationActivity.this,task.getException().getMessage(),Toast.LENGTH_LONG).show();
                 }
@@ -281,13 +267,14 @@ public class RegistrationActivity extends AppCompatActivity {
             @Override
             public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
                 verificationComplete = 2;
-                signup.setText("Enter otp");
-                //                Toast.makeText(RegistrationActivity.this,"verification completed",Toast.LENGTH_SHORT).show();
+                                Toast.makeText(RegistrationActivity.this,"verification completed",Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onVerificationFailed(FirebaseException e) {
                 verificationComplete = 0;
+                signup.setText("Register");
+                verify_flag=false;
                 Toast.makeText(RegistrationActivity.this,"verification failed",Toast.LENGTH_SHORT).show();
             }
 
@@ -295,8 +282,8 @@ public class RegistrationActivity extends AppCompatActivity {
             public void onCodeSent(String s, PhoneAuthProvider.ForceResendingToken forceResendingToken) {
                 super.onCodeSent(s, forceResendingToken);
                 verificationComplete = 1;
-                verificationCode = s;
-//                Toast.makeText(RegistrationActivity.this,"Code sent",Toast.LENGTH_SHORT).show();
+//                verificationCode = s;
+                Toast.makeText(RegistrationActivity.this,"Code sent",Toast.LENGTH_SHORT).show();
             }
         };
     }
@@ -311,6 +298,7 @@ public class RegistrationActivity extends AppCompatActivity {
         rb1 = (RadioButton)findViewById(R.id.radioButton1_user);
         rb2 = (RadioButton)findViewById(R.id.radioButton2_voluteer);
         signup = (Button)findViewById(R.id.button_sign_up);
+        verify_flag = false;
     }
 
     private boolean isValidName(String Name){

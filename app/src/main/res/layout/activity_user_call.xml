@@ -13,23 +13,23 @@
         android:layout_width="0dp"
         android:layout_height="60dp"
         android:layout_marginStart="130dp"
+        android:layout_marginTop="50dp"
         android:layout_marginEnd="130dp"
-        android:layout_marginBottom="130dp"
         android:background="@android:color/holo_red_dark"
         android:text="END"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttoncall" />
 
     <TextView
         android:id="@+id/txtvw"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
         android:layout_marginStart="142dp"
-        android:layout_marginTop="275dp"
+        android:layout_marginTop="50dp"
         android:layout_marginEnd="143dp"
         android:text="Please rate your call"
         android:textColor="@android:color/white"
@@ -37,21 +37,22 @@
         android:textStyle="normal"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.458"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/button_user_end" />
 
     <Button
         android:id="@+id/button_submit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="161dp"
+        android:layout_marginTop="26dp"
         android:layout_marginEnd="162dp"
-        android:layout_marginBottom="87dp"
         android:text="Submit"
         android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@+id/button_user_end"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/b2" />
 
     <Button
         android:id="@+id/b1"
@@ -127,8 +128,8 @@
         android:id="@+id/final_r"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:layout_marginTop="47dp"
-        android:layout_marginEnd="87dp"
+        android:layout_marginTop="29dp"
+        android:layout_marginEnd="192dp"
         android:gravity="center"
         android:text="r"
         android:textColor="@android:color/white"
@@ -136,6 +137,72 @@
         android:textStyle="bold"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/b5" />
+        app:layout_constraintTop_toBottomOf="@+id/button_submit" />
+
+    <TextView
+        android:id="@+id/textView18"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="75dp"
+        android:layout_marginTop="100dp"
+        android:layout_marginEnd="10dp"
+        android:text="Volunteer Name:"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toStartOf="@+id/v_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/v_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="100dp"
+        android:layout_marginEnd="75dp"
+        android:text="name"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textView18"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView19"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="75dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="10dp"
+        android:text="Volunteer Number:"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toStartOf="@+id/v_number"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView18" />
+
+    <TextView
+        android:id="@+id/v_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="75dp"
+        android:text="number"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textView19"
+        app:layout_constraintTop_toBottomOf="@+id/textView18" />
+
+    <Button
+        android:id="@+id/buttoncall"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="161dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginEnd="162dp"
+        android:background="@color/my_bright_green"
+        android:text="CALL"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView19" />
 
 </android.support.constraint.ConstraintLayout>

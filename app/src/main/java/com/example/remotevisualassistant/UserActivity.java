@@ -7,6 +7,9 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -32,12 +35,14 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +69,10 @@ public class UserActivity extends AppCompatActivity implements
     private boolean loc_set;
 
     private boolean edit_flag;
+
+    private Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+    private Ringtone r;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,7 +112,7 @@ public class UserActivity extends AppCompatActivity implements
 //                            Toast.makeText(UserActivity.this,"Call started",Toast.LENGTH_SHORT).show();
                             if(loc_set){
                                 progressDialog = new ProgressDialog(UserActivity.this);
-                                progressDialog.setMessage("Calling...");
+                                progressDialog.setMessage("Calling random volunteer");
                                 progressDialog.setCanceledOnTouchOutside(false);
                                 progressDialog.show();
 
@@ -114,16 +123,43 @@ public class UserActivity extends AppCompatActivity implements
                                 final String s1 = ud.getName();
                                 final String s2 = ud.getNumber();
                                 final String vid_url = "http://" + ud.getDevice_ip() + ":8081";
-                                if(rv.isChecked()){
-                                    //randomly choose a volunteer
-                                    final String id_to = "OafXvcb3goRQRZJPL2dQV6AiU0M2";
 
-                                    final DatabaseReference usrdbr = FirebaseDatabase.getInstance().getReference("userdetails");
-                                    usrdbr.child(id_to).addListenerForSingleValueEvent(new ValueEventListener() {
+                                if(rv.isChecked()){
+                                    r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+                                    r.play();
+
+                                    DatabaseReference activenss = FirebaseDatabase.getInstance().getReference("active_volunteers");
+                                    activenss.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                            final UserDetails to_ud = dataSnapshot.getValue(UserDetails.class);
-                                            make_a_call(my_id, id_to, s1, s2, vid_url, to_ud.getName(),to_ud.getNumber());
+                                            if(dataSnapshot.getChildrenCount()>0){
+                                                List<String> online_ids = new ArrayList<String>();
+                                                for(DataSnapshot postSnapshot : dataSnapshot.getChildren()){
+                                                    online_ids.add(postSnapshot.getValue(String.class));
+                                                }
+                                                int randomv = (int)(Math.random()*online_ids.size());
+                                                final String id_to = online_ids.get(randomv);
+
+                                                final DatabaseReference usrdbr = FirebaseDatabase.getInstance().getReference("userdetails");
+                                                usrdbr.child(id_to).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                        final UserDetails to_ud = dataSnapshot.getValue(UserDetails.class);
+                                                        make_a_call(my_id, id_to, s1, s2, vid_url, to_ud.getName(),to_ud.getNumber());
+                                                    }
+
+                                                    @Override
+                                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                    }
+                                                });
+
+                                            }
+                                            else{
+                                                r.stop();
+                                                progressDialog.dismiss();
+                                                build_an_alert("Call Failed","No volunteers currently active, please try again","okay");
+                                            }
                                         }
 
                                         @Override
@@ -131,7 +167,6 @@ public class UserActivity extends AppCompatActivity implements
 
                                         }
                                     });
-
                                 }
                                 else{
                                     //cycle through frequent volunteers until someone accepts or timer runs out
@@ -159,14 +194,35 @@ public class UserActivity extends AppCompatActivity implements
                                                         progressDialog = new ProgressDialog(UserActivity.this);
                                                         progressDialog.setMessage("Calling..."+my_contacts[which]);
                                                         progressDialog.setCanceledOnTouchOutside(false);
-                                                        progressDialog.show();// user checked an item
+                                                        progressDialog.show();
+                                                        r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+                                                        r.play();
+
                                                         final String id_to = conlist.get(which+1);
-                                                        final DatabaseReference usrdbr = FirebaseDatabase.getInstance().getReference("userdetails");
-                                                        usrdbr.child(id_to).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        DatabaseReference nssdbr = FirebaseDatabase.getInstance().getReference("nssvolunteers");
+                                                        nssdbr.addListenerForSingleValueEvent(new ValueEventListener() {
                                                             @Override
-                                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                                final UserDetails to_ud = dataSnapshot.getValue(UserDetails.class);
-                                                                make_a_call(my_id, id_to, s1, s2, vid_url, to_ud.getName(),to_ud.getNumber());
+                                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                                if(snapshot.hasChild(id_to)){
+                                                                    DatabaseReference usrdbr = FirebaseDatabase.getInstance().getReference("userdetails");
+                                                                    usrdbr.child(id_to).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                        @Override
+                                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                            final UserDetails to_ud = dataSnapshot.getValue(UserDetails.class);
+                                                                            make_a_call(my_id, id_to, s1, s2, vid_url, to_ud.getName(),to_ud.getNumber());
+                                                                        }
+
+                                                                        @Override
+                                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                        }
+                                                                    });
+                                                                }
+                                                                else{
+                                                                    r.stop();
+                                                                    progressDialog.dismiss();
+                                                                    build_an_alert("Request failed", "This volunteer seems to have deregistered. try contacting someone else", "okay");
+                                                                }
                                                             }
 
                                                             @Override
@@ -206,7 +262,7 @@ public class UserActivity extends AppCompatActivity implements
                                             public void onClick(DialogInterface dialog, int which) {
                                                 //continue with call
                                                 progressDialog = new ProgressDialog(UserActivity.this);
-                                                progressDialog.setMessage("Calling...");
+                                                progressDialog.setMessage("Calling random volunteer");
                                                 progressDialog.setCanceledOnTouchOutside(false);
                                                 progressDialog.show();
 
@@ -214,14 +270,41 @@ public class UserActivity extends AppCompatActivity implements
                                                 final String s2 = ud.getNumber();
                                                 final String vid_url = "http://" + ud.getDevice_ip() + ":8081";
                                                 if(rv.isChecked()){
-                                                    final String id_to = "OafXvcb3goRQRZJPL2dQV6AiU0M2";
+                                                    r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+                                                    r.play();
 
-                                                    final DatabaseReference usrdbr = FirebaseDatabase.getInstance().getReference("userdetails");
-                                                    usrdbr.child(id_to).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    DatabaseReference activenss = FirebaseDatabase.getInstance().getReference("active_volunteers");
+                                                    activenss.addListenerForSingleValueEvent(new ValueEventListener() {
                                                         @Override
                                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                            final UserDetails to_ud = dataSnapshot.getValue(UserDetails.class);
-                                                            make_a_call(my_id, id_to, s1, s2, vid_url, to_ud.getName(),to_ud.getNumber());
+                                                            if(dataSnapshot.getChildrenCount()>0){
+                                                                List<String> online_ids = new ArrayList<String>();
+                                                                for(DataSnapshot postSnapshot : dataSnapshot.getChildren()){
+                                                                    online_ids.add(postSnapshot.getValue(String.class));
+                                                                }
+                                                                int randomv = (int)(Math.random()*online_ids.size());
+                                                                final String id_to = online_ids.get(randomv);
+
+                                                                final DatabaseReference usrdbr = FirebaseDatabase.getInstance().getReference("userdetails");
+                                                                usrdbr.child(id_to).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                    @Override
+                                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                        final UserDetails to_ud = dataSnapshot.getValue(UserDetails.class);
+                                                                        make_a_call(my_id, id_to, s1, s2, vid_url, to_ud.getName(),to_ud.getNumber());
+                                                                    }
+
+                                                                    @Override
+                                                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                    }
+                                                                });
+
+                                                            }
+                                                            else{
+                                                                r.stop();
+                                                                progressDialog.dismiss();
+                                                                build_an_alert("Call Failed","No volunteers currently active, please try again","okay");
+                                                            }
                                                         }
 
                                                         @Override
@@ -256,14 +339,35 @@ public class UserActivity extends AppCompatActivity implements
                                                                         progressDialog = new ProgressDialog(UserActivity.this);
                                                                         progressDialog.setMessage("Calling..."+my_contacts[which]);
                                                                         progressDialog.setCanceledOnTouchOutside(false);
-                                                                        progressDialog.show();// user checked an item
+                                                                        progressDialog.show();
+                                                                        r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+                                                                        r.play();
+
                                                                         final String id_to = conlist.get(which+1);
-                                                                        final DatabaseReference usrdbr = FirebaseDatabase.getInstance().getReference("userdetails");
-                                                                        usrdbr.child(id_to).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                        DatabaseReference nssdbr = FirebaseDatabase.getInstance().getReference("nssvolunteers");
+                                                                        nssdbr.addListenerForSingleValueEvent(new ValueEventListener() {
                                                                             @Override
-                                                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                                                final UserDetails to_ud = dataSnapshot.getValue(UserDetails.class);
-                                                                                make_a_call(my_id, id_to, s1, s2, vid_url, to_ud.getName(),to_ud.getNumber());
+                                                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                                                if(snapshot.hasChild(id_to)){
+                                                                                    DatabaseReference usrdbr = FirebaseDatabase.getInstance().getReference("userdetails");
+                                                                                    usrdbr.child(id_to).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                                        @Override
+                                                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                                            final UserDetails to_ud = dataSnapshot.getValue(UserDetails.class);
+                                                                                            make_a_call(my_id, id_to, s1, s2, vid_url, to_ud.getName(),to_ud.getNumber());
+                                                                                        }
+
+                                                                                        @Override
+                                                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                                        }
+                                                                                    });
+                                                                                }
+                                                                                else{
+                                                                                    progressDialog.dismiss();
+                                                                                    r.stop();
+                                                                                    build_an_alert("Request failed", "This volunteer seems to have deregistered. try contacting someone else", "okay");
+                                                                                }
                                                                             }
 
                                                                             @Override
@@ -426,49 +530,13 @@ public class UserActivity extends AppCompatActivity implements
         });
     }
 
-    private void cycle_calls(final String my_id, final String my_name, final String my_number, final String vid_url, List<String> clist){
-        int max_calls = 4;
-        if(clist.size()<4){
-            max_calls = clist.size();
-        }
-        for(int i=0;i<max_calls;i++){
-            final String id_to = clist.get(i);
-            DatabaseReference usrdbr = FirebaseDatabase.getInstance().getReference("userdetails");
-            usrdbr.child(id_to).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    UserDetails ud_to = dataSnapshot.getValue(UserDetails.class);
-                    make_a_call(my_id,id_to,my_name,my_number,vid_url,ud_to.getName(),ud_to.getNumber());
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-        }
-    }
-
     private void make_a_call(final String my_id, final String id_to, String s1, String s2, String vid_url, final String name_to, String number_to) {
-
-
-//        Toast.makeText(UserActivity.this, "Creating Communications", Toast.LENGTH_SHORT).show();
         create_communication_out(my_id, id_to, s1,name_to,number_to);
         create_communication_in(my_id, id_to, s1, s2, vid_url);
-
-//        long start_time = System.currentTimeMillis();
-//        long curr_time = start_time;
-//        while((curr_time-start_time)/1000<15){
-//            if((int)((curr_time-start_time)/1000)%5==3){
-//
-//            }
-//            curr_time=System.currentTimeMillis();
-//        }
 
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             public void run() {
-                // yourMethod();
                 DatabaseReference codbr = FirebaseDatabase.getInstance().getReference("out_comms");
                 codbr.child(my_id).addChildEventListener(new ChildEventListener() {
                     @Override
@@ -482,10 +550,12 @@ public class UserActivity extends AppCompatActivity implements
                         int resp = dataSnapshot.getValue(int.class);
                         if (resp == 1) {
                             progressDialog.dismiss();
+                            r.stop();
                             Intent my_intent = new Intent(UserActivity.this, UserCallActivity.class);
                             startActivity(my_intent);
                         } else if (resp == 2) {
                             progressDialog.dismiss();
+                            r.stop();
                             Toast.makeText(UserActivity.this, "Call was rejected", Toast.LENGTH_SHORT).show();
 //                            delete_communication_in(id_to);
 //                            delete_communication_out(my_id);
@@ -508,6 +578,7 @@ public class UserActivity extends AppCompatActivity implements
                     }
                 });
 
+                r.stop();
                 progressDialog.dismiss();
                 android.support.v7.app.AlertDialog.Builder builder = new AlertDialog.Builder(UserActivity.this);
                 builder.setTitle("Call failed");
@@ -673,7 +744,7 @@ public class UserActivity extends AppCompatActivity implements
     @Override
     protected void onPause() {
         super.onPause();
-        Log.v(this.getClass().getSimpleName(), "onPause()");
+//        Log.v(this.getClass().getSimpleName(), "onPause()");
 
         //Disconnect from API onPause()
         if (mGoogleApiClient.isConnected()) {
@@ -698,14 +769,11 @@ public class UserActivity extends AppCompatActivity implements
 
         if (location == null) {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-            //Toast.makeText(this, " NOT WORKING ", Toast.LENGTH_LONG).show();
-
 
         } else {
             //If everything went fine lets get latitude and longitude
             currentLatitude = location.getLatitude();
             currentLongitude = location.getLongitude();
-//            Toast.makeText(this, currentLatitude + " WORKS " + currentLongitude + "", Toast.LENGTH_LONG).show();
             curr_lat = currentLatitude;
             curr_lon = currentLongitude;
             loc_set=true;
@@ -733,22 +801,23 @@ public class UserActivity extends AppCompatActivity implements
                  */
             } catch (IntentSender.SendIntentException e) {
                 // Log the error
-                e.printStackTrace();
+//                e.printStackTrace();
             }
         } else {
             /*
              * If no resolution is available, display a dialog to the
              * user with the error.
              */
-            Log.e("Error", "Location services connection failed with code " + connectionResult.getErrorCode());
+//            Log.e("Error", "Location services connection failed with code " + connectionResult.getErrorCode());
         }
     }
 
     @Override
     public void onLocationChanged(Location location) {
-//        currentLatitude = location.getLatitude();
-//        currentLongitude = location.getLongitude();
-//
-//        Toast.makeText(this, currentLatitude + " WORKS " + currentLongitude + "", Toast.LENGTH_LONG).show();
+        currentLatitude = location.getLatitude();
+        currentLongitude = location.getLongitude();
+        curr_lat = currentLatitude;
+        curr_lon = currentLongitude;
+        loc_set=true;
     }
 }

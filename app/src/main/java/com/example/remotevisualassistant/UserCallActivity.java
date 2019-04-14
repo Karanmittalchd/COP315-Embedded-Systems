@@ -1,7 +1,11 @@
 package com.example.remotevisualassistant;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -25,14 +29,36 @@ import java.util.List;
 
 public class UserCallActivity extends AppCompatActivity {
 
-    private Button b_end,b_submit;
-    private TextView t,tr;
+    private Button b_end,b_submit,b_call;
+    private TextView t,tr,vname,vnum;
     private Button b1,b2,b3,b4,b5;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_call);
         set_UI_components();
+
+        b_call.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                GlobalDefinitions.IsProgramRunning=true;
+                Intent callIntent = new Intent(Intent.ACTION_CALL);
+//                callIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                callIntent.setData(Uri.parse("tel:+91"+vnum.getText().toString().trim()));
+                if(ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(UserCallActivity.this, new String[]{Manifest.permission.CALL_PHONE},10);
+                    return;
+                }
+                else{
+                    try{
+                        startActivity(callIntent);
+                    }
+                    catch(android.content.ActivityNotFoundException e){
+                        Toast.makeText(getApplicationContext(),"Activity not found",Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        });
 
         b_end.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -180,8 +206,11 @@ public class UserCallActivity extends AppCompatActivity {
     private void set_UI_components(){
         b_end = (Button)findViewById(R.id.button_user_end);
         b_submit = (Button)findViewById(R.id.button_submit);
+        b_call = (Button)findViewById(R.id.buttoncall);
         t = (TextView)findViewById(R.id.txtvw);
         tr = (TextView)findViewById(R.id.final_r);
+        vname = (TextView)findViewById(R.id.v_name);
+        vnum = (TextView)findViewById(R.id.v_number);
         b1 = (Button)findViewById(R.id.b1);
         b2 = (Button)findViewById(R.id.b2);
         b3 = (Button)findViewById(R.id.b3);
@@ -189,5 +218,21 @@ public class UserCallActivity extends AppCompatActivity {
         b5 = (Button)findViewById(R.id.b5);
 
         tr.setText("0");
+
+        final String my_id = FirebaseAuth.getInstance().getUid();
+        DatabaseReference codbr = FirebaseDatabase.getInstance().getReference("out_comms");
+        codbr.child(my_id).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                CommunicationOut co = dataSnapshot.getValue(CommunicationOut.class);
+                vname.setText(co.getName_to());
+                vnum.setText(co.getNumber_to());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 }

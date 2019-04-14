@@ -22,6 +22,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -49,17 +50,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         set_up_UI_elements();
-//        FirebaseUser user = fbAuth.getCurrentUser();
+
+//        mAuth = FirebaseAuth.getInstance();
+//        FirebaseUser user = mAuth.getCurrentUser();
 //        if(user!=null){
-//            pd = new ProgressDialog(MainActivityLogin.this);
+//            pd = new ProgressDialog(MainActivity.this);
 //            pd.setMessage("Signing in ...");
 //            pd.setCanceledOnTouchOutside(false);
 //            pd.show();
 //
-//            String id = fbAuth.getUid().toString();
+//            String id = mAuth.getUid().toString();
 //            DatabaseReference mydbr = FirebaseDatabase.getInstance().getReference("userdata2");
-//            //String uid = mydbr.push().getKey();
-//            //
 //            mydbr.child(id).addListenerForSingleValueEvent(new ValueEventListener() {
 //                @Override
 //                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -75,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
 //                }
 //            });
 //        }
-        //check here for returning user !
+        //check here for returning user !mAuth
 
         Signin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -170,21 +171,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-//        uvswitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                if(isChecked){
-//                    email.setText("useralpha@gmail.com");
-//                    password.setText("useralpha");
-//                    uvt.setText("User");
-//                }
-//                else{
-//                    email.setText("volunteeralpha@gmail.com");
-//                    password.setText("volunteeralpha");
-//                    uvt.setText("Volunteer");
-//                }
-//            }
-//        });
     }
 
     private boolean check_email_format(String s){
@@ -227,10 +213,6 @@ public class MainActivity extends AppCompatActivity {
         Signin = (Button)findViewById(R.id.button_login);
         Signup = (TextView)findViewById(R.id.text_sign_up);
         Forgotpwd = (TextView)findViewById(R.id.text_forgot_password);
-//        errortext = (TextView)findViewById(R.id.et1);
-
-//        uvswitch = (Switch)findViewById(R.id.switch1);
-//        uvt = (TextView)findViewById(R.id.uv);
     }
 
     private int validate_input(String s1, String s2){

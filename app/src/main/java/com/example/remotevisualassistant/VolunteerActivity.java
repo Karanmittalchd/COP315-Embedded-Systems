@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -21,14 +23,18 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class VolunteerActivity extends AppCompatActivity {
 
     private Button b_signout, b_accept, b_reject, b_nss;
-    private ImageButton b_refresh_in;
     private TextView in_name, in_number, status_nss, hours_nss, call_logs, settings;
     private FirebaseAuth mAuth;
     private EditText eno;
+    private CheckBox active;
     private boolean in_coming;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,43 +42,38 @@ public class VolunteerActivity extends AppCompatActivity {
 
         setup_UI_components();
 
-        //clicking refresh
-        b_refresh_in.setOnClickListener(new View.OnClickListener() {
+
+        mAuth = FirebaseAuth.getInstance();
+        final String my_id = mAuth.getUid();
+        final DatabaseReference cidbr = FirebaseDatabase.getInstance().getReference("in_comms");
+        cidbr.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onClick(View v) {
-                //if incoming communications exist: check CommunicationIn
-                mAuth = FirebaseAuth.getInstance();
-                final String my_id = mAuth.getUid();
-                DatabaseReference cidbr = FirebaseDatabase.getInstance().getReference("in_comms");
-                cidbr.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if(dataSnapshot.hasChild(my_id)){
-                            CommunicationIn my_ci = dataSnapshot.child(my_id).getValue(CommunicationIn.class);
-                            in_name.setText(my_ci.getName_from());
-                            in_number.setText(my_ci.getNumber_from());
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChild(my_id)){
+                    CommunicationIn my_ci = dataSnapshot.child(my_id).getValue(CommunicationIn.class);
+                    in_name.setText(my_ci.getName_from());
+                    in_number.setText(my_ci.getNumber_from());
 //                            b_accept.setBackgroundColor(getResources().getColor(R.color.my_bright_green));
-                            b_accept.setVisibility(View.VISIBLE);
-                            b_reject.setVisibility(View.VISIBLE);
-                            in_coming=true;
-                        }
-                        else{
-                            Toast.makeText(VolunteerActivity.this,"No incoming",Toast.LENGTH_SHORT).show();
-                            b_accept.setVisibility(View.INVISIBLE);
-                            b_reject.setVisibility(View.INVISIBLE);
-                            in_name.setText("...");
-                            in_number.setText("....");
-                            in_coming=false;
-                        }
-                    }
+                    b_accept.setVisibility(View.VISIBLE);
+                    b_reject.setVisibility(View.VISIBLE);
+                    in_coming=true;
+                }
+                else{
+                    Toast.makeText(VolunteerActivity.this,"No incoming",Toast.LENGTH_SHORT).show();
+                    b_accept.setVisibility(View.INVISIBLE);
+                    b_reject.setVisibility(View.INVISIBLE);
+                    in_name.setText("...");
+                    in_number.setText("....");
+                    in_coming=false;
+                }
+            }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                    }
-                });
             }
         });
+
 
         //clicking answer
         b_accept.setOnClickListener(new View.OnClickListener() {
@@ -193,6 +194,63 @@ public class VolunteerActivity extends AppCompatActivity {
             }
         });
 
+        active.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    final String my_id = FirebaseAuth.getInstance().getUid();
+                    final DatabaseReference activenss = FirebaseDatabase.getInstance().getReference("active_volunteers");
+                    activenss.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if(dataSnapshot.getChildrenCount()>0){
+                                List<String> online_ids = new ArrayList<String>();
+                                for(DataSnapshot postSnapshot : dataSnapshot.getChildren()){
+                                    online_ids.add(postSnapshot.getValue(String.class));
+                                }
+                                if(!online_ids.contains(my_id)){
+                                    online_ids.add(my_id);
+                                    activenss.setValue(online_ids);
+                                }
+                            }
+                            else{
+                                List<String> online_ids = new ArrayList<String>();
+                                online_ids.add(my_id);
+                                activenss.setValue(online_ids);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+                else{
+                    final String my_id = FirebaseAuth.getInstance().getUid();
+                    final DatabaseReference activenss = FirebaseDatabase.getInstance().getReference("active_volunteers");
+                    activenss.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if(dataSnapshot.getChildrenCount()>0){
+                                List<String> online_ids = new ArrayList<String>();
+                                for(DataSnapshot postSnapshot : dataSnapshot.getChildren()){
+                                    online_ids.add(postSnapshot.getValue(String.class));
+                                }
+                                online_ids.remove(my_id);
+                                activenss.setValue(online_ids);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            }
+        });
+
         call_logs.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -213,6 +271,7 @@ public class VolunteerActivity extends AppCompatActivity {
         b_signout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                active.setChecked(false);
                 mAuth = FirebaseAuth.getInstance();
                 mAuth.signOut();
 
@@ -228,7 +287,6 @@ public class VolunteerActivity extends AppCompatActivity {
         b_accept = (Button)findViewById(R.id.button_accept);
         in_name = (TextView)findViewById(R.id.text_name);
         in_number = (TextView)findViewById(R.id.text_number);
-        b_refresh_in = (ImageButton)findViewById(R.id.imageButton_refresh_in);
         in_coming = false;
         b_nss = (Button)findViewById(R.id.button_register_nss);
         eno = (EditText)findViewById(R.id.entry_no);
@@ -237,12 +295,13 @@ public class VolunteerActivity extends AppCompatActivity {
         call_logs = (TextView)findViewById(R.id.logs_volunteer);
         settings = (TextView)findViewById(R.id.ps_volunteer);
         b_reject = (Button)findViewById(R.id.button_Reject);
+        active = (CheckBox)findViewById(R.id.nss_active);
 
         update_nss_status();
     }
 
     private void update_nss_status(){
-        String my_id = FirebaseAuth.getInstance().getUid();
+        final String my_id = FirebaseAuth.getInstance().getUid();
         DatabaseReference nssdbr = FirebaseDatabase.getInstance().getReference("nssvolunteers");
         nssdbr.child(my_id).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -255,11 +314,39 @@ public class VolunteerActivity extends AppCompatActivity {
                     hours_nss.setVisibility(View.VISIBLE);
                     status_nss.setText("Registered to "+nd.getEntry_no());
                     hours_nss.setText(nd.getHours()+" hrs");
-                    //status_nss.setTextColor(getColor(R.color.my_bright_green));
+                    active.setVisibility(View.VISIBLE);
+                    DatabaseReference activenss = FirebaseDatabase.getInstance().getReference("active_volunteers");
+                    activenss.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if(dataSnapshot.getChildrenCount()>0){
+                                List<String> online_ids = new ArrayList<String>();
+                                for(DataSnapshot postSnapshot : dataSnapshot.getChildren()){
+                                    online_ids.add(postSnapshot.getValue(String.class));
+                                }
+                                if(online_ids.contains(my_id)){
+                                    active.setChecked(true);
+                                }
+                                else{
+                                    active.setChecked(false);
+                                }
+                            }
+                            else{
+                                active.setChecked(false);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+
                 }
                 else{
                     status_nss.setVisibility(View.INVISIBLE);
                     hours_nss.setVisibility(View.INVISIBLE);
+                    active.setVisibility(View.INVISIBLE);
                     b_nss.setVisibility(View.VISIBLE);
                     eno.setVisibility(View.VISIBLE);
                 }

@@ -8,6 +8,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,12 +27,20 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContactsActivity extends AppCompatActivity {
+public class ContactsActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     private Button bsearch;
     private EditText number;
     private ListView listview;
     private ProgressDialog pd;
+
+    private ArrayAdapter<String> adapter;
+    private List<String> tmp;
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +95,7 @@ public class ContactsActivity extends AppCompatActivity {
                                                                             newuc.addContact(ud.id,ud.getName(),ud.getNumber());
                                                                             cdbr.child(my_id).setValue(newuc);
                                                                             update_contacts_list();
+
                                                                             number.setText("");
                                                                             pd.dismiss();
                                                                         }
@@ -147,6 +157,64 @@ public class ContactsActivity extends AppCompatActivity {
                 }
             }
         });
+
+        listview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                final String item = tmp.get(position);
+                AlertDialog.Builder builder = new AlertDialog.Builder(ContactsActivity.this);
+                builder.setMessage("Remove "+item+" from frequent volunteers?");
+                builder.setCancelable(false);
+                builder.setPositiveButton(
+                        "yes",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                pd = new ProgressDialog(ContactsActivity.this);
+                                pd.setMessage("Adding contact");
+                                pd.setCanceledOnTouchOutside(false);
+                                pd.show();
+
+                                final String my_id = FirebaseAuth.getInstance().getUid();
+                                final DatabaseReference cdbr = FirebaseDatabase.getInstance().getReference("usercontacts");
+                                cdbr.child(my_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        UserContacts newuc = dataSnapshot.getValue(UserContacts.class);
+                                        newuc.deleteContact(position);
+                                        cdbr.child(my_id).setValue(newuc);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                });
+
+                                tmp.remove(item);
+                                adapter = new ArrayAdapter<>(getApplication(),android.R.layout.simple_list_item_1,tmp);
+                                listview.setAdapter(adapter);
+
+                                pd.dismiss();
+
+                                dialog.cancel();
+                            }
+                        });
+                builder.setNegativeButton(
+                        "no",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        }
+                );
+                AlertDialog alert1 = builder.create();
+                alert1.show();
+                return false;
+            }
+        });
+
     }
 
     private void set_UI_components(){
@@ -174,11 +242,11 @@ public class ContactsActivity extends AppCompatActivity {
                 UserContacts uc = dataSnapshot.getValue(UserContacts.class);
                 String[] tnames = uc.getContactNames().split(";");
                 String[] tnums = uc.getContactNumbers().split(";");
-                List<String> tmp = new ArrayList<String>();
+                tmp = new ArrayList<String>();
                 for(int i=0;i<uc.getSize();i++) {
                     tmp.add(tnums[i+1] + " - " + tnames[i+1]);
                 }
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplication(),android.R.layout.simple_list_item_1,tmp);
+                adapter = new ArrayAdapter<>(getApplication(),android.R.layout.simple_list_item_1,tmp);
                 listview.setAdapter(adapter);
             }
 
@@ -187,34 +255,6 @@ public class ContactsActivity extends AppCompatActivity {
 
             }
         });
-    }
-
-    private void build_an_alert_changeactivity(String t, String m, String b, final String tp){
-        android.support.v7.app.AlertDialog.Builder builder = new AlertDialog.Builder(ContactsActivity.this);
-        builder.setTitle(t);
-        builder.setMessage(m);
-        builder.setCancelable(false);
-        builder.setPositiveButton(
-                b,
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                        if(tp.equals("User")){
-                            Intent myintent = new Intent(ContactsActivity.this,UserActivity.class);
-                            startActivity(myintent);
-                            finish();
-                        }
-                        else{
-                            Intent myintent = new Intent(ContactsActivity.this,VolunteerActivity.class);
-                            startActivity(myintent);
-                            finish();
-                        }
-                    }
-                }
-        );
-        AlertDialog alert1 = builder.create();
-        alert1.show();
     }
 
     private void build_an_alert(String t, String m, String b){
