@@ -39,7 +39,7 @@ import com.google.firebase.database.ValueEventListener;
 public class VolunteerVideoActivity extends AppCompatActivity{
 //        extends FragmentActivity implements OnMapReadyCallback {
 
-    private TextView in_name, in_number;
+    private TextView in_name, in_number,in_url;
 //    private MapView mapView;
     private WebView webView;
     private ImageButton b_play, b_call, b_gps, b_end;
@@ -99,9 +99,9 @@ public class VolunteerVideoActivity extends AppCompatActivity{
         b_play.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String link="http://192.168.225.32:8081";
+                //String link="http://192.168.225.32:8081";
                 webView.bringToFront();
-                webView.loadUrl(link);
+                webView.loadUrl(in_url.getText().toString());
 
             }
         });
@@ -111,7 +111,8 @@ public class VolunteerVideoActivity extends AppCompatActivity{
             public void onClick(View v) {
 
 //                mGoogleMap.getUiSettings().setAllGesturesEnabled(true);
-
+                Intent my_intent = new Intent(VolunteerVideoActivity.this,MapsActivity.class);
+                startActivity(my_intent);
             }
         });
 
@@ -158,6 +159,7 @@ public class VolunteerVideoActivity extends AppCompatActivity{
     private void set_UI_components(){
         in_name = (TextView)findViewById(R.id.text_caller_name);
         in_number = (TextView)findViewById(R.id.text_caller_number);
+        in_url = (TextView)findViewById(R.id.text_vidurl);
         //videoView = (VideoView)findViewById(R.id.videoView);
 //        mapView = (MapView)findViewById(R.id.mapView);
         webView = (WebView)findViewById(R.id.webView);
@@ -166,6 +168,44 @@ public class VolunteerVideoActivity extends AppCompatActivity{
         b_gps = (ImageButton)findViewById(R.id.imageButton_gps);
         b_end =(ImageButton)findViewById(R.id.imageButton_end);
 
+        String id = FirebaseAuth.getInstance().getUid();
+        DatabaseReference cidbr = FirebaseDatabase.getInstance().getReference("in_comms");
+        cidbr.child(id).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                CommunicationIn my_ci = dataSnapshot.getValue(CommunicationIn.class);
+                in_name.setText(my_ci.getName_from());
+                in_number.setText(my_ci.getNumber_from());
+                in_url.setText(my_ci.getVid_url());
+                String from_id = my_ci.getId_from();
+//                DatabaseReference locdbr = FirebaseDatabase.getInstance().getReference("last_location");
+//                locdbr.child(from_id).addListenerForSingleValueEvent(new ValueEventListener() {
+//                    @Override
+//                    public void onDataChange(@NonNull DataSnapshot dSnapshot) {
+//                        UserTracking ut = dSnapshot.getValue(UserTracking.class);
+//                        LatLng usrcoord = new LatLng(Double.parseDouble(ut.getLat()),Double.parseDouble(ut.getLng()));
+//                        Location usrloc = new Location("");
+//                        usrloc.setLatitude(Double.parseDouble(ut.getLat()));
+//                        usrloc.setLongitude(Double.parseDouble(ut.getLng()));
+//                        mGoogleMap.addMarker(new MarkerOptions()
+//                                                    .position(usrcoord)
+//                                                    .title("User").snippet("snippet")
+//                                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+//                        mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(usrcoord,12.0f));
+//                    }
+//
+//                    @Override
+//                    public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                    }
+//                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
     }
 }

@@ -46,6 +46,8 @@ import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class UserActivity extends AppCompatActivity implements
         ConnectionCallbacks,
@@ -426,8 +428,8 @@ public class UserActivity extends AppCompatActivity implements
             public void onClick(View v) {
                 final String s = dev_ip.getText().toString().trim();
                 if (!validate_device(s)) {
-                    String[] x = s.split("\\.");
-                    Toast.makeText(UserActivity.this, "Invalid IP format: " + x.length, Toast.LENGTH_SHORT).show();
+//                    String[] x = s.split("\\.");
+                    Toast.makeText(UserActivity.this, "Invalid IP format:, accepted format is IP:port", Toast.LENGTH_SHORT).show();
                 } else {
                     final String id = FirebaseAuth.getInstance().getUid();
                     final DatabaseReference mydbr = FirebaseDatabase.getInstance().getReference("userdetails");
@@ -455,7 +457,7 @@ public class UserActivity extends AppCompatActivity implements
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError databaseError) {
-                            Toast.makeText(UserActivity.this, "Error: Device not registered", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(UserActivity.this, "Error: Device not logged", Toast.LENGTH_SHORT).show();
                         }
                     });
                 }
@@ -634,7 +636,7 @@ public class UserActivity extends AppCompatActivity implements
                     b_device.setVisibility(View.INVISIBLE);
                     dev_status.setVisibility(View.VISIBLE);
                     staus_heading.setVisibility(View.VISIBLE);
-                    dev_status.setText("Connected to IP: " + ud.getDevice_ip());
+                    dev_status.setText("Logged-in to IP: " + ud.getDevice_ip());
                     dev_status.setTextColor(getResources().getColor(R.color.my_bright_green));
                 } else {
                     dev_hd.setText("Device not paired");
@@ -653,9 +655,29 @@ public class UserActivity extends AppCompatActivity implements
         });
     }
 
+    private boolean format_IP(String s){
+        String IPADDRESS_PATTERN =
+                "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+                        "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+                        "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+                        "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
+        Pattern pattern = Pattern.compile(IPADDRESS_PATTERN);
+        Matcher matcher = pattern.matcher(s);
+        return matcher.matches();
+    }
+
+    private boolean format_port(String s){
+        if(s.length()!=4){
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
+
     private boolean validate_device(String s) {
-        String[] x = s.split("\\.");
-        if (x.length == 4) {
+        String[] x = s.split(":");
+        if (format_IP(x[0])&&format_port(x[2])) {
             return true;
         } else {
             return false;

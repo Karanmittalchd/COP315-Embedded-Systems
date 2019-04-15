@@ -1,6 +1,8 @@
 package com.example.remotevisualassistant;
 
+import android.content.DialogInterface;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ListView;
@@ -50,7 +52,29 @@ public class CallLogsActivity extends AppCompatActivity {
         });
 
         //Toast.makeText(CallLogsActivity.this,logList.size(),Toast.LENGTH_LONG).show();
+        if(adapter.logList.size()>0){
+            listView.setAdapter(adapter);
+        }
+        else{
+            build_an_alert("Logs empty","You currently have no logs","okay");
+        }
+    }
 
-        listView.setAdapter(adapter);
+    private void build_an_alert(String t, String m, String b){
+        android.support.v7.app.AlertDialog.Builder builder = new AlertDialog.Builder(CallLogsActivity.this);
+        builder.setTitle(t);
+        builder.setMessage(m);
+        builder.setCancelable(false);
+        builder.setPositiveButton(
+                b,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                }
+        );
+        AlertDialog alert1 = builder.create();
+        alert1.show();
     }
 }
