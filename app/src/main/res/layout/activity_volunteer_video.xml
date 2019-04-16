@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/my_dark_grey"
     tools:context=".VolunteerVideoActivity">
-
-<android.support.constraint.ConstraintLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
 
     <TextView
         android:id="@+id/text_caller_name2"
@@ -106,12 +102,14 @@
     <WebView
         android:id="@+id/webView"
         android:layout_width="0dp"
-        android:layout_height="480dp"
+        android:layout_height="0dp"
         android:layout_marginStart="15dp"
         android:layout_marginTop="15dp"
         android:layout_marginEnd="15dp"
+        android:layout_marginBottom="100dp"
         android:foregroundGravity="center"
         android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/divider9" />
@@ -119,9 +117,9 @@
     <ImageButton
         android:id="@+id/imageButton_end"
         android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="100dp"
-        android:layout_marginEnd="100dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="115dp"
+        android:layout_marginEnd="115dp"
         android:layout_marginBottom="15dp"
         android:background="@color/my_light_blue"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -132,10 +130,10 @@
     <ImageButton
         android:id="@+id/imageButton_play"
         android:layout_width="100dp"
-        android:layout_height="50dp"
+        android:layout_height="40dp"
         android:layout_marginStart="40dp"
         android:layout_marginBottom="15dp"
-        android:background="@color/my_button_grey"
+        android:background="@color/my_light_blue"
         app:layout_constraintBottom_toTopOf="@+id/imageButton_end"
         app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@drawable/ic_play" />
@@ -143,25 +141,23 @@
     <ImageButton
         android:id="@+id/imageButton_call"
         android:layout_width="100dp"
-        android:layout_height="50dp"
+        android:layout_height="40dp"
         android:layout_marginStart="15dp"
-        android:layout_marginTop="15dp"
         android:layout_marginEnd="15dp"
         android:layout_marginBottom="15dp"
-        android:background="@color/my_button_grey"
+        android:background="@color/my_light_blue"
         app:layout_constraintBottom_toTopOf="@+id/imageButton_end"
         app:layout_constraintEnd_toStartOf="@+id/imageButton_gps"
         app:layout_constraintStart_toEndOf="@+id/imageButton_play"
-        app:layout_constraintTop_toBottomOf="@id/webView"
         app:srcCompat="@drawable/ic_call" />
 
     <ImageButton
         android:id="@+id/imageButton_gps"
         android:layout_width="100dp"
-        android:layout_height="50dp"
+        android:layout_height="40dp"
         android:layout_marginEnd="40dp"
         android:layout_marginBottom="15dp"
-        android:background="@color/my_button_grey"
+        android:background="@color/my_light_blue"
         app:layout_constraintBottom_toTopOf="@+id/imageButton_end"
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/ic_location" />
@@ -179,7 +175,4 @@
         <!--class="com.google.a8ndroid.gms.maps.MapFragment"/>-->
 
 
-
 </android.support.constraint.ConstraintLayout>
-
-</android.support.v4.widget.NestedScrollView>

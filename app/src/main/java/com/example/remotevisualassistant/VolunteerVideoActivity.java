@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.ImageButton;
 import android.widget.MediaController;
@@ -99,12 +100,15 @@ public class VolunteerVideoActivity extends AppCompatActivity{
         b_play.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //String link="http://192.168.225.32:8081";
-                webView.bringToFront();
-                webView.loadUrl(in_url.getText().toString());
+//                webView.bringToFront();
 
+                webView.getSettings().setBuiltInZoomControls(true);
+                webView.getSettings().setDisplayZoomControls(false);
+                webView.loadUrl(in_url.getText().toString());
             }
         });
+
+
 
         b_gps.setOnClickListener(new View.OnClickListener() {
             @Override
