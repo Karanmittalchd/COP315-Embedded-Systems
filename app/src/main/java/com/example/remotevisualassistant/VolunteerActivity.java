@@ -1,6 +1,7 @@
 package com.example.remotevisualassistant;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -25,6 +26,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,10 +51,12 @@ public class VolunteerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_volunteer);
 
         setup_UI_components();
-
+        final String my_id = FirebaseAuth.getInstance().getUid();
+        String tok = FirebaseInstanceId.getInstance().getToken();
+        DatabaseReference tdbr = FirebaseDatabase.getInstance().getReference("usr_fcm_tokens");
+        tdbr.child(my_id).setValue(String.valueOf(tok));
 
         mAuth = FirebaseAuth.getInstance();
-        final String my_id = mAuth.getUid();
         final DatabaseReference cidbr = FirebaseDatabase.getInstance().getReference("in_comms");
         cidbr.addValueEventListener(new ValueEventListener() {
             @Override

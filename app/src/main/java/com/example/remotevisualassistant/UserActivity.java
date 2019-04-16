@@ -11,6 +11,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -25,6 +26,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.remotevisualassistant.Service.MyFirebaseMessagingService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -43,6 +45,9 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingService;
+import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +87,10 @@ public class UserActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_user);
 
         setup_UI_components();
+        String my_id = FirebaseAuth.getInstance().getUid();
+        String tok = FirebaseInstanceId.getInstance().getToken();
+        DatabaseReference tdbr = FirebaseDatabase.getInstance().getReference("usr_fcm_tokens");
+        tdbr.child(my_id).setValue(String.valueOf(tok));
 //        Bundle extras = getIntent().getExtras();
 //        if(extras!=null){
 //            first_call = extras.getString("first_call");
@@ -109,6 +118,10 @@ public class UserActivity extends AppCompatActivity implements
         b_req.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                progressDialog = new ProgressDialog(UserActivity.this);
+                progressDialog.setMessage("Calling please wait");
+                progressDialog.setCanceledOnTouchOutside(false);
+                progressDialog.show();
                 final String my_id = FirebaseAuth.getInstance().getUid();
                 DatabaseReference mydbr = FirebaseDatabase.getInstance().getReference("userdetails");
                 mydbr.child(my_id).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -116,15 +129,13 @@ public class UserActivity extends AppCompatActivity implements
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         final UserDetails ud = dataSnapshot.getValue(UserDetails.class);
                         if(!ud.isSet()){
+                            progressDialog.dismiss();
                             build_an_alert("Request failed", "Please configure the device IP in the section below", "okay");
                         }
                         else{
 //                            Toast.makeText(UserActivity.this,"Call started",Toast.LENGTH_SHORT).show();
                             if(loc_set){
-                                progressDialog = new ProgressDialog(UserActivity.this);
-                                progressDialog.setMessage("Calling random volunteer");
-                                progressDialog.setCanceledOnTouchOutside(false);
-                                progressDialog.show();
+//                                progressDialog.setMessage("Calling ...");
 
                                 DatabaseReference locdbr = FirebaseDatabase.getInstance().getReference("last_location");
                                 UserLocation ul = new UserLocation(my_id,curr_lat,curr_lon);
@@ -136,6 +147,7 @@ public class UserActivity extends AppCompatActivity implements
 //                                final String vid_url = "http://" + ud.getDevice_ip() + ":8081";
 
                                 if(rv.isChecked()){
+                                    progressDialog.setMessage("Calling a random volunteer");
                                     r = RingtoneManager.getRingtone(getApplicationContext(), notification);
                                     r.play();
 
@@ -262,6 +274,7 @@ public class UserActivity extends AppCompatActivity implements
                                 }
                             }
                             else{
+                                progressDialog.dismiss();
                                 android.support.v7.app.AlertDialog.Builder builder = new AlertDialog.Builder(UserActivity.this);
                                 builder.setTitle("Warning");
                                 builder.setMessage("Couldnt fetch location. Check GPS on/off or continue without location sharing");
@@ -273,7 +286,7 @@ public class UserActivity extends AppCompatActivity implements
                                             public void onClick(DialogInterface dialog, int which) {
                                                 //continue with call
                                                 progressDialog = new ProgressDialog(UserActivity.this);
-                                                progressDialog.setMessage("Calling random volunteer");
+                                                progressDialog.setMessage("Calling ..");
                                                 progressDialog.setCanceledOnTouchOutside(false);
                                                 progressDialog.show();
 
@@ -281,6 +294,7 @@ public class UserActivity extends AppCompatActivity implements
                                                 final String s2 = ud.getNumber();
                                                 final String vid_url = "http://" + ud.getDevice_ip();
                                                 if(rv.isChecked()){
+                                                    progressDialog.setMessage("Calling a random volunteer");
                                                     r = RingtoneManager.getRingtone(getApplicationContext(), notification);
                                                     r.play();
 
@@ -414,6 +428,7 @@ public class UserActivity extends AppCompatActivity implements
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
                                                 //call cancelled
+
                                                 dialog.cancel();
                                             }
                                         }
@@ -530,9 +545,33 @@ public class UserActivity extends AppCompatActivity implements
 
     }
 
-    private void make_a_call(final String my_id, final String id_to, String s1, String s2, String vid_url, final String name_to, String number_to) {
+    private void make_a_call(final String my_id, final String id_to, final String s1, String s2, String vid_url, final String name_to, String number_to) {
         create_communication_out(my_id, id_to, s1,name_to,number_to);
         create_communication_in(my_id, id_to, s1, s2, vid_url);
+        DatabaseReference tokdbr = FirebaseDatabase.getInstance().getReference("usr_fcm_tokens");
+        tokdbr.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChild(id_to)){
+                    String to_tkn = dataSnapshot.child(id_to).getValue(String.class);
+                    RemoteMessage.Builder remoteMessage = new RemoteMessage.Builder(to_tkn+"@gcm.googleapis.com");
+                    remoteMessage.addData("title","Incoming Call");
+                    remoteMessage.addData("content","Call from "+s1+". Click here to open app");
+                    remoteMessage.setTtl(15);
+                    FirebaseMessaging fm = FirebaseMessaging.getInstance();
+                    fm.send(remoteMessage.build());
+                }
+                else{
+                    Toast.makeText(UserActivity.this,"Volunteer has not loggen-in, Can't be notified", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
 //        if(first_call.equals("true")){
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {

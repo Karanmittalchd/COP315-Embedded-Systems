@@ -23,6 +23,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ProfileSettingsActivity extends AppCompatActivity {
 
     private TextView email,name,number,role;
@@ -82,11 +85,54 @@ public class ProfileSettingsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 FirebaseAuth mAuth = FirebaseAuth.getInstance();
                 mAuth.signOut();
-                finish();
                 //if user, sognout. if volunteer, set nss active status to false
+                //also remove fcm token
+                final String my_id = mAuth.getUid();
+                DatabaseReference usrdbr = FirebaseDatabase.getInstance().getReference("userdetails");
+                usrdbr.child(my_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+                        UserDetails ud = dataSnapshot.getValue(UserDetails.class);
+                        if(ud.getType().equals("User")){
+                            DatabaseReference tokdbr = FirebaseDatabase.getInstance().getReference("usr_fcm_tokens");
+                            tokdbr.child(my_id).removeValue();
+                        }
+                        else{
+                            DatabaseReference tokdbr = FirebaseDatabase.getInstance().getReference("usr_fcm_tokens");
+                            tokdbr.child(my_id).removeValue();
+                            final DatabaseReference activenss = FirebaseDatabase.getInstance().getReference("active_volunteers");
+                            activenss.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dSnapshot) {
+                                    if(dSnapshot.getChildrenCount()>0){
+                                        List<String> online_ids = new ArrayList<String>();
+                                        for(DataSnapshot postSnapshot : dSnapshot.getChildren()){
+                                            online_ids.add(postSnapshot.getValue(String.class));
+                                        }
+                                        if(online_ids.contains(my_id)){
+                                            online_ids.remove(my_id);
+                                            activenss.setValue(online_ids);
+                                        }
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
 
                 Intent my_intent = new Intent(ProfileSettingsActivity.this, MainActivity.class);
                 startActivity(my_intent);
+                finish();
             }
         });
     }
