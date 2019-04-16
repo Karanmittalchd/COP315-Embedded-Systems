@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
-    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:allowBackup="true"
@@ -20,10 +20,19 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".OCRActivity" android:screenOrientation="portrait"></activity>
-        <activity android:name=".ProfileSettingsActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".CallLogsActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".ContactsActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".OCRPiActivity"></activity>
+        <activity
+            android:name=".OCRActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ProfileSettingsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".CallLogsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ContactsActivity"
+            android:screenOrientation="portrait" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -38,37 +47,51 @@
 
         <activity
             android:name=".MapsActivity"
-            android:screenOrientation="portrait"
-            android:label="@string/title_activity_maps">
+            android:label="@string/title_activity_maps"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.remotevisualassistant.VolunteerVideoActivity" />
         </activity>
-        <activity android:name=".UserCallActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".VolunteerVideoActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".VolunteerActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".UserActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".RegistrationActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".MainActivity" android:screenOrientation="portrait">
+        <activity
+            android:name=".UserCallActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".VolunteerVideoActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".VolunteerActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".UserActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".RegistrationActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <service android:name=".MyFirebaseMessagingService">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
         <service android:name=".FirebaseIDService">
             <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
 
-        <meta-data android:name="com.google.android.gms.vision.DEPENDENCIES"
-            android:value="ocr"/>
+        <meta-data
+            android:name="com.google.android.gms.vision.DEPENDENCIES"
+            android:value="ocr" />
     </application>
 
 </manifest>

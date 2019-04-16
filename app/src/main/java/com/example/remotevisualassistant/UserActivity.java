@@ -124,7 +124,8 @@ public class UserActivity extends AppCompatActivity implements
 
                                 final String s1 = ud.getName();
                                 final String s2 = ud.getNumber();
-                                final String vid_url = "http://" + ud.getDevice_ip() + ":8081";
+                                final String vid_url = "http://" + ud.getDevice_ip();
+//                                final String vid_url = "http://" + ud.getDevice_ip() + ":8081";
 
                                 if(rv.isChecked()){
                                     r = RingtoneManager.getRingtone(getApplicationContext(), notification);
@@ -270,7 +271,7 @@ public class UserActivity extends AppCompatActivity implements
 
                                                 final String s1 = ud.getName();
                                                 final String s2 = ud.getNumber();
-                                                final String vid_url = "http://" + ud.getDevice_ip() + ":8081";
+                                                final String vid_url = "http://" + ud.getDevice_ip();
                                                 if(rv.isChecked()){
                                                     r = RingtoneManager.getRingtone(getApplicationContext(), notification);
                                                     r.play();
@@ -490,7 +491,7 @@ public class UserActivity extends AppCompatActivity implements
         ocr.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent my_intent = new Intent(UserActivity.this, OCRActivity.class);
+                Intent my_intent = new Intent(UserActivity.this, OCRPiActivity.class);
                 startActivity(my_intent);
             }
         });
