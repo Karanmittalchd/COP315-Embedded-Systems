@@ -678,7 +678,7 @@ public class UserActivity extends AppCompatActivity implements
 
     private boolean validate_device(String s) {
         String[] x = s.split(":");
-        if (format_IP(x[0])&&format_port(x[2])) {
+        if (format_IP(x[0])&&format_port(x[1])) {
             return true;
         } else {
             return false;
