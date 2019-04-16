@@ -2,13 +2,16 @@ package com.example.remotevisualassistant;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -31,6 +34,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -43,7 +47,8 @@ public class VolunteerVideoActivity extends AppCompatActivity{
     private TextView in_name, in_number,in_url;
 //    private MapView mapView;
     private WebView webView;
-    private ImageButton b_play, b_call, b_gps, b_end;
+    private ImageButton b_play, b_call, b_gps;
+//            , b_end;
     private GoogleMap mGoogleMap;
     private SupportMapFragment mapFrag;
 
@@ -53,6 +58,57 @@ public class VolunteerVideoActivity extends AppCompatActivity{
         setContentView(R.layout.activity_volunteer_video);
 
         set_UI_components();
+        ;
+        final String my_id = FirebaseAuth.getInstance().getUid();
+        final DatabaseReference cidbr = FirebaseDatabase.getInstance().getReference("in_comms");
+        cidbr.child(my_id).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                boolean cut = dataSnapshot.getValue(boolean.class);
+                if(cut){
+                    android.support.v7.app.AlertDialog.Builder builder = new AlertDialog.Builder(VolunteerVideoActivity.this);
+                    builder.setTitle("Call Ended");
+                    builder.setMessage("User ended the call. press okay to return to volunteer home");
+                    builder.setCancelable(false);
+                    builder.setPositiveButton(
+                            "okay",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.cancel();
+                                    Intent my_intent = new Intent(VolunteerVideoActivity.this,VolunteerActivity.class);
+                                    startActivity(my_intent);
+                                    finish();
+                                }
+                            }
+                    );
+                    AlertDialog alert1 = builder.create();
+                    alert1.show();
+                }
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
 //
 //        mapFrag=(SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.mapFragment);
 //        mapFrag.getMapAsync(this);
@@ -140,18 +196,14 @@ public class VolunteerVideoActivity extends AppCompatActivity{
             }
         });
 
-        b_end.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String id = FirebaseAuth.getInstance().getUid();
-                DatabaseReference cidbr = FirebaseDatabase.getInstance().getReference("in_comms");
-                cidbr.child(id).removeValue();
-
-                Intent my_intent = new Intent(VolunteerVideoActivity.this,VolunteerActivity.class);
-                startActivity(my_intent);
-                finish();
-            }
-        });
+//        b_end.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                String id = FirebaseAuth.getInstance().getUid();
+//                DatabaseReference cidbr = FirebaseDatabase.getInstance().getReference("in_comms");
+//                cidbr.child(id).removeValue();
+//            }
+//        });
     }
 //
 //    @Override
@@ -170,7 +222,7 @@ public class VolunteerVideoActivity extends AppCompatActivity{
         b_play = (ImageButton)findViewById(R.id.imageButton_play);
         b_call = (ImageButton)findViewById(R.id.imageButton_call);
         b_gps = (ImageButton)findViewById(R.id.imageButton_gps);
-        b_end =(ImageButton)findViewById(R.id.imageButton_end);
+//        b_end =(ImageButton)findViewById(R.id.imageButton_end);
 
         String id = FirebaseAuth.getInstance().getUid();
         DatabaseReference cidbr = FirebaseDatabase.getInstance().getReference("in_comms");

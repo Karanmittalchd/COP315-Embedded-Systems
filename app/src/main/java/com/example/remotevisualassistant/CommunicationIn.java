@@ -2,7 +2,7 @@ package com.example.remotevisualassistant;
 
 public class CommunicationIn {
     String id_from, id_to, name_from, number_from, vid_url;
-    boolean active;
+    boolean call_cut;
 
     public CommunicationIn(){
 
@@ -14,7 +14,7 @@ public class CommunicationIn {
         this.name_from = name_from;
         this.number_from = number_from;
         this.vid_url = vid_url;
-        active = false;
+        call_cut = false;
     }
 
     public String getId_from() {
@@ -37,11 +37,11 @@ public class CommunicationIn {
         return vid_url;
     }
 
-    public boolean isActive() {
-        return active;
+    public boolean isCall_cut() {
+        return call_cut;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
+    public void setCall_cut(boolean callcut) {
+        this.call_cut = callcut;
     }
 }

@@ -39,6 +39,9 @@ public class CallLogsActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 AllLogs my_logs = dataSnapshot.getValue(AllLogs.class);
                 List<CallLog> call_logs = my_logs.getLogList();
+                if(call_logs.size()<1){
+                    build_an_alert("Logs empty","You currently have no logs","okay");
+                }
                 for(int i=1;i<call_logs.size();i++){
                     adapter.add(call_logs.get(i));
                     adapter.notifyDataSetChanged();
@@ -52,12 +55,11 @@ public class CallLogsActivity extends AppCompatActivity {
         });
 
         //Toast.makeText(CallLogsActivity.this,logList.size(),Toast.LENGTH_LONG).show();
-        if(adapter.logList.size()>0){
+//        if(logList.size()>0){
             listView.setAdapter(adapter);
-        }
-        else{
-            build_an_alert("Logs empty","You currently have no logs","okay");
-        }
+//        }
+//        else{
+//        }
     }
 
     private void build_an_alert(String t, String m, String b){

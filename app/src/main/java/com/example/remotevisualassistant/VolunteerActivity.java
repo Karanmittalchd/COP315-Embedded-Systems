@@ -1,6 +1,9 @@
 package com.example.remotevisualassistant;
 
 import android.content.Intent;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -35,6 +38,10 @@ public class VolunteerActivity extends AppCompatActivity {
     private CheckBox active;
     private boolean in_coming;
 
+    private Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+    private Ringtone r;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,12 +58,16 @@ public class VolunteerActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.hasChild(my_id)){
                     CommunicationIn my_ci = dataSnapshot.child(my_id).getValue(CommunicationIn.class);
-                    in_name.setText(my_ci.getName_from());
-                    in_number.setText(my_ci.getNumber_from());
+                    if(!my_ci.isCall_cut()){
+                        in_name.setText(my_ci.getName_from());
+                        in_number.setText(my_ci.getNumber_from());
 //                            b_accept.setBackgroundColor(getResources().getColor(R.color.my_bright_green));
-                    b_accept.setVisibility(View.VISIBLE);
-                    b_reject.setVisibility(View.VISIBLE);
-                    in_coming=true;
+                        b_accept.setVisibility(View.VISIBLE);
+                        b_reject.setVisibility(View.VISIBLE);
+                        in_coming=true;
+                        r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+                        r.play();
+                    }
                 }
                 else{
                     Toast.makeText(VolunteerActivity.this,"No incoming",Toast.LENGTH_SHORT).show();
@@ -96,6 +107,7 @@ public class VolunteerActivity extends AppCompatActivity {
                                     cou.setWaiting(1);
                                     codbr.child(cin_id).setValue(cou);
 
+                                    r.stop();
                                     Intent my_intent = new Intent(VolunteerActivity.this,VolunteerVideoActivity.class);
                                     startActivity(my_intent);
                                     finish();
@@ -124,6 +136,7 @@ public class VolunteerActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(in_coming){
+                    r.stop();
                     final String my_id = FirebaseAuth.getInstance().getUid();
                     DatabaseReference cidbr = FirebaseDatabase.getInstance().getReference("in_comms");
                     cidbr.child(my_id).addListenerForSingleValueEvent(new ValueEventListener() {

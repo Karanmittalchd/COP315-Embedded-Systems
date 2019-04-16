@@ -63,7 +63,34 @@ public class UserCallActivity extends AppCompatActivity {
         b_end.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                final String my_id = FirebaseAuth.getInstance().getUid();
+                final DatabaseReference codbr = FirebaseDatabase.getInstance().getReference("out_comms");
+                codbr.child(my_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        CommunicationOut my_co = dataSnapshot.getValue(CommunicationOut.class);
+                        final String to_id = my_co.getId_to();
+                        final DatabaseReference cidbr = FirebaseDatabase.getInstance().getReference("in_comms");
+                        cidbr.child(to_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dSnapshot) {
+                                CommunicationIn comin = dSnapshot.getValue(CommunicationIn.class);
+                                comin.setCall_cut(true);
+                                cidbr.child(to_id).setValue(comin);
+                            }
 
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
                 b_end.setVisibility(View.INVISIBLE);
                 t.setVisibility(View.VISIBLE);
                 tr.setVisibility(View.VISIBLE);
@@ -88,14 +115,18 @@ public class UserCallActivity extends AppCompatActivity {
                 }
                 else{
                     final String my_id = FirebaseAuth.getInstance().getUid();
-                    DatabaseReference codbr = FirebaseDatabase.getInstance().getReference("out_comms");
+                    final DatabaseReference codbr = FirebaseDatabase.getInstance().getReference("out_comms");
                     codbr.child(my_id).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            CommunicationOut my_co = dataSnapshot.getValue(CommunicationOut.class);
+                        public void onDataChange(@NonNull DataSnapshot datanapshot) {
+                            CommunicationOut my_co = datanapshot.getValue(CommunicationOut.class);
                             final String to_id = my_co.getId_to();
                             final DatabaseReference logdbr = FirebaseDatabase.getInstance().getReference("call_logs");
                             final CallLog cl = new CallLog(my_id,to_id,my_co.getName_from(),my_co.getName_to(),"0.0",tr.getText().toString().trim());
+                            DatabaseReference cidbr = FirebaseDatabase.getInstance().getReference("in_comms");
+                            cidbr.child(to_id).removeValue();
+                            codbr.child(my_id).removeValue();
+
                             logdbr.child(my_id).addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -119,6 +150,7 @@ public class UserCallActivity extends AppCompatActivity {
                                     list_all_logs.add(cl);
                                     my_logs.setLogList(list_all_logs);
                                     logdbr.child(to_id).setValue(my_logs);
+
                                 }
 
                                 @Override
@@ -133,7 +165,6 @@ public class UserCallActivity extends AppCompatActivity {
 
                         }
                     });
-                    codbr.child(my_id).removeValue();
 
                     Intent my_intent = new Intent(UserCallActivity.this, UserActivity.class);
                     startActivity(my_intent);
