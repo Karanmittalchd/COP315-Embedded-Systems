@@ -51,31 +51,31 @@ public class MainActivity extends AppCompatActivity {
 
         set_up_UI_elements();
 
-//        mAuth = FirebaseAuth.getInstance();
-//        FirebaseUser user = mAuth.getCurrentUser();
-//        if(user!=null){
-//            pd = new ProgressDialog(MainActivity.this);
-//            pd.setMessage("Signing in ...");
-//            pd.setCanceledOnTouchOutside(false);
-//            pd.show();
-//
-//            String id = mAuth.getUid().toString();
-//            DatabaseReference mydbr = FirebaseDatabase.getInstance().getReference("userdata2");
-//            mydbr.child(id).addListenerForSingleValueEvent(new ValueEventListener() {
-//                @Override
-//                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                    String user_type = dataSnapshot.getValue(UserDetails.class).getType();
-//                    pd.dismiss();
-//                    switch_activity(user_type);
-//                }
-//
-//                @Override
-//                public void onCancelled(@NonNull DatabaseError databaseError) {
-//                    pd.dismiss();
-//                    Toast.makeText(getApplicationContext(),"Unable to retrieve user data",Toast.LENGTH_SHORT).show();
-//                }
-//            });
-//        }
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = mAuth.getCurrentUser();
+        if(user!=null){
+            pd = new ProgressDialog(MainActivity.this);
+            pd.setMessage("Signing in ...");
+            pd.setCanceledOnTouchOutside(false);
+            pd.show();
+
+            String id = user.getUid();
+            DatabaseReference mydbr = FirebaseDatabase.getInstance().getReference("userdetails");
+            mydbr.child(id).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    UserDetails ud = dataSnapshot.getValue(UserDetails.class);
+                    pd.dismiss();
+                    switch_activity(ud.getType());
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    pd.dismiss();
+                    Toast.makeText(getApplicationContext(),"Unable to retrieve user data",Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
         //check here for returning user !mAuth
 
         Signin.setOnClickListener(new View.OnClickListener() {

@@ -43,6 +43,8 @@ public class OCRPiActivity extends AppCompatActivity {
 //                webView.scrollTo(webView.get,webView);
                 webView.getSettings().setBuiltInZoomControls(true);
                 webView.getSettings().setDisplayZoomControls(false);
+                webView.getSettings().setLoadWithOverviewMode(true);
+                webView.getSettings().setUseWideViewPort(true);
                 webView.loadUrl(vid_url);
             }
         });

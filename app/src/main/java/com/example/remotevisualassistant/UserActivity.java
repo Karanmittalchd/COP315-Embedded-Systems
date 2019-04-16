@@ -60,11 +60,10 @@ public class UserActivity extends AppCompatActivity implements
     private double currentLatitude;
     private double currentLongitude;
 
-    private Button b_req, b_device, b_signout, b_edit;
+    private Button ocr, contacts, logs, settings, b_req, b_device, b_edit;
     private CheckBox rv;
-    private TextView dev_status, ocr, contacts, logs, staus_heading, dev_hd, settings;
+    private TextView dev_status, staus_heading, dev_hd;
     private EditText dev_ip;
-    private FirebaseAuth mAuth;
     private ProgressDialog progressDialog;
 
     private double curr_lat,curr_lon;
@@ -529,17 +528,6 @@ public class UserActivity extends AppCompatActivity implements
             }
         });
 
-        //on clicking signout
-        b_signout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mAuth = FirebaseAuth.getInstance();
-                mAuth.signOut();
-                finish();
-                Intent my_intent = new Intent(UserActivity.this, MainActivity.class);
-                startActivity(my_intent);
-            }
-        });
     }
 
     private void make_a_call(final String my_id, final String id_to, String s1, String s2, String vid_url, final String name_to, String number_to) {
@@ -701,19 +689,18 @@ public class UserActivity extends AppCompatActivity implements
     }
 
     private void setup_UI_components() {
-        b_signout = (Button) findViewById(R.id.button_signout);
         b_req = (Button) findViewById(R.id.button_req);
         b_device = (Button) findViewById(R.id.button_connect);
-        contacts = (TextView) findViewById(R.id.contacts_manager);
+        contacts = (Button) findViewById(R.id.contacts_manager);
         dev_ip = (EditText) findViewById(R.id.editText_ip);
         dev_status = (TextView) findViewById(R.id.text_status);
         rv = (CheckBox) findViewById(R.id.checkBox);
-        logs = (TextView) findViewById(R.id.check_logs_user);
+        logs = (Button) findViewById(R.id.check_logs_user);
         b_edit = (Button) findViewById(R.id.edit_device_button);
         staus_heading = (TextView) findViewById(R.id.textView9);
         dev_hd = (TextView) findViewById(R.id.textViewdd);
-        settings = (TextView) findViewById(R.id.ps_user);
-        ocr = (TextView) findViewById(R.id.textView11);
+        settings = (Button) findViewById(R.id.ps_user);
+        ocr = (Button) findViewById(R.id.textView11);
 
         edit_flag = false;
 

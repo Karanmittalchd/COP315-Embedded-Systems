@@ -160,6 +160,8 @@ public class VolunteerVideoActivity extends AppCompatActivity{
 
                 webView.getSettings().setBuiltInZoomControls(true);
                 webView.getSettings().setDisplayZoomControls(false);
+                webView.getSettings().setLoadWithOverviewMode(true);
+                webView.getSettings().setUseWideViewPort(true);
                 webView.loadUrl(in_url.getText().toString());
             }
         });

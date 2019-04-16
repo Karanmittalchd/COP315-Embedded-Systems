@@ -1,5 +1,6 @@
 package com.example.remotevisualassistant;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -26,7 +27,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
 
     private TextView email,name,number,role;
     private EditText oldp, newp1, newp2;
-    private Button b_update;
+    private Button b_update, b_signout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,6 +76,19 @@ public class ProfileSettingsActivity extends AppCompatActivity {
                     }
             }
         });
+
+        b_signout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth mAuth = FirebaseAuth.getInstance();
+                mAuth.signOut();
+                finish();
+                //if user, sognout. if volunteer, set nss active status to false
+
+                Intent my_intent = new Intent(ProfileSettingsActivity.this, MainActivity.class);
+                startActivity(my_intent);
+            }
+        });
     }
 
     private void set_UI_components(){
@@ -86,6 +100,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         newp1 = (EditText)findViewById(R.id.new_p1);
         newp2 = (EditText)findViewById(R.id.new_p2);
         b_update = (Button)findViewById(R.id.button_upd_p);
+        b_signout = (Button)findViewById(R.id.buttonsignout);
 
         final String my_id = FirebaseAuth.getInstance().getUid();
         DatabaseReference mydbr = FirebaseDatabase.getInstance().getReference("userdetails");

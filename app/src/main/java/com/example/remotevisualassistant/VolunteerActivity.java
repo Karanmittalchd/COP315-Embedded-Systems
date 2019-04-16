@@ -31,8 +31,8 @@ import java.util.List;
 
 public class VolunteerActivity extends AppCompatActivity {
 
-    private Button b_signout, b_accept, b_reject, b_nss;
-    private TextView in_name, in_number, status_nss, hours_nss, call_logs, settings;
+    private Button b_accept, b_reject, b_nss, call_logs, settings;
+    private TextView in_name, in_number, status_nss, hours_nss;
     private FirebaseAuth mAuth;
     private EditText eno;
     private CheckBox active;
@@ -281,22 +281,21 @@ public class VolunteerActivity extends AppCompatActivity {
         });
 
         //clicking signout
-        b_signout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                active.setChecked(false);
-                mAuth = FirebaseAuth.getInstance();
-                mAuth.signOut();
-
-                Intent my_intent = new Intent(VolunteerActivity.this, MainActivity.class);
-                startActivity(my_intent);
-                finish();
-            }
-        });
+//        b_signout.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                active.setChecked(false);
+//                mAuth = FirebaseAuth.getInstance();
+//                mAuth.signOut();
+//
+//                Intent my_intent = new Intent(VolunteerActivity.this, MainActivity.class);
+//                startActivity(my_intent);
+//                finish();
+//            }
+//        });
     }
 
     private void setup_UI_components(){
-        b_signout = (Button)findViewById(R.id.button_v_signout);
         b_accept = (Button)findViewById(R.id.button_accept);
         in_name = (TextView)findViewById(R.id.text_name);
         in_number = (TextView)findViewById(R.id.text_number);
@@ -305,8 +304,8 @@ public class VolunteerActivity extends AppCompatActivity {
         eno = (EditText)findViewById(R.id.entry_no);
         status_nss = (TextView)findViewById(R.id.nss_status);
         hours_nss = (TextView)findViewById(R.id.nss_hours);
-        call_logs = (TextView)findViewById(R.id.logs_volunteer);
-        settings = (TextView)findViewById(R.id.ps_volunteer);
+        call_logs = (Button) findViewById(R.id.logs_volunteer);
+        settings = (Button) findViewById(R.id.ps_volunteer);
         b_reject = (Button)findViewById(R.id.button_Reject);
         active = (CheckBox)findViewById(R.id.nss_active);
 
