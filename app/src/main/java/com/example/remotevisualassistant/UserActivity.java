@@ -51,6 +51,9 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -573,158 +576,73 @@ public class UserActivity extends AppCompatActivity implements
         });
 
 //        if(first_call.equals("true")){
-            Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                public void run(){
-                    DatabaseReference codbr = FirebaseDatabase.getInstance().getReference("out_comms");
-                    codbr.child(my_id).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            CommunicationOut myco = dataSnapshot.getValue(CommunicationOut.class);
-                            if(myco.getWaiting()==0){
-                                r.stop();
-                                progressDialog.dismiss();
-                                android.support.v7.app.AlertDialog.Builder builder = new AlertDialog.Builder(UserActivity.this);
-                                builder.setTitle("Call failed");
-                                builder.setMessage(name_to+" was not responding");
-                                builder.setCancelable(false);
-                                builder.setPositiveButton(
-                                        "okay",
-                                        new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                delete_communication_in(id_to);
-                                                delete_communication_out(my_id);
-                                                dialog.cancel();
-                                            }
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run(){
+                DatabaseReference codbr = FirebaseDatabase.getInstance().getReference("out_comms");
+                codbr.child(my_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        CommunicationOut myco = dataSnapshot.getValue(CommunicationOut.class);
+                        if(myco.getWaiting()==0){
+                            r.stop();
+                            progressDialog.dismiss();
+                            android.support.v7.app.AlertDialog.Builder builder = new AlertDialog.Builder(UserActivity.this);
+                            builder.setTitle("Call failed");
+                            builder.setMessage(name_to+" was not responding");
+                            builder.setCancelable(false);
+                            builder.setPositiveButton(
+                                    "okay",
+                                    new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            delete_communication_in(id_to);
+                                            delete_communication_out(my_id);
+                                            dialog.cancel();
                                         }
-                                );
-                                AlertDialog alert1 = builder.create();
-                                alert1.show();
-                            }
-                            else if(myco.getWaiting()==1){
-                                r.stop();
-                                progressDialog.dismiss();
-                                Intent my_intent = new Intent(UserActivity.this, UserCallActivity.class);
-                                startActivity(my_intent);
-                                finish();
-                            }
-                            else if (myco.getWaiting()==2){
-                                r.stop();
-                                progressDialog.dismiss();
-                                android.support.v7.app.AlertDialog.Builder builder = new AlertDialog.Builder(UserActivity.this);
-                                builder.setTitle("Call failed");
-                                builder.setMessage(name_to+" rejected your call");
-                                builder.setCancelable(false);
-                                builder.setPositiveButton(
-                                        "okay",
-                                        new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                delete_communication_in(id_to);
-                                                delete_communication_out(my_id);
-                                                dialog.cancel();
-                                            }
+                                    }
+                            );
+                            AlertDialog alert1 = builder.create();
+                            alert1.show();
+                        }
+                        else if(myco.getWaiting()==1){
+                            r.stop();
+                            progressDialog.dismiss();
+                            Intent my_intent = new Intent(UserActivity.this, UserCallActivity.class);
+                            startActivity(my_intent);
+                            finish();
+                        }
+                        else if (myco.getWaiting()==2){
+                            r.stop();
+                            progressDialog.dismiss();
+                            android.support.v7.app.AlertDialog.Builder builder = new AlertDialog.Builder(UserActivity.this);
+                            builder.setTitle("Call failed");
+                            builder.setMessage(name_to+" rejected your call");
+                            builder.setCancelable(false);
+                            builder.setPositiveButton(
+                                    "okay",
+                                    new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            delete_communication_in(id_to);
+                                            delete_communication_out(my_id);
+                                            dialog.cancel();
                                         }
-                                );
-                                AlertDialog alert1 = builder.create();
-                                alert1.show();
-                            }
-
+                                    }
+                            );
+                            AlertDialog alert1 = builder.create();
+                            alert1.show();
                         }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                    }
 
-                        }
-                    });
-                }
-            },15000);
-            //first_call="false";
-//        }
-//        else{
-//            Handler handler = new Handler();
-//            handler.postDelayed(new Runnable() {
-//                public void run() {
-//                    DatabaseReference codbr = FirebaseDatabase.getInstance().getReference("out_comms");
-//                    codbr.child(my_id).addChildEventListener(new ChildEventListener() {
-//                        @Override
-//                        public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-//
-//                        }
-//
-//                        @Override
-//                        public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-//                            //CommunicationOut c_out = dataSnapshot.getValue(boolean);
-//                            int resp = dataSnapshot.getValue(int.class);
-//                            if (resp == 1) {
-//                                r.stop();
-//                                progressDialog.dismiss();
-//                                Intent my_intent = new Intent(UserActivity.this, UserCallActivity.class);
-//                                startActivity(my_intent);
-//                            } else if (resp == 2) {
-//                                r.stop();
-//                                progressDialog.dismiss();
-//                                //Toast.makeText(UserActivity.this, "Call was rejected", Toast.LENGTH_SHORT).show();
-//                                android.support.v7.app.AlertDialog.Builder builder = new AlertDialog.Builder(UserActivity.this);
-//                                builder.setTitle("Call failed");
-//                                builder.setMessage(name_to+"rejected your call");
-//                                builder.setCancelable(false);
-//                                builder.setPositiveButton(
-//                                        "okay",
-//                                        new DialogInterface.OnClickListener() {
-//                                            @Override
-//                                            public void onClick(DialogInterface dialog, int which) {
-//                                                delete_communication_in(id_to);
-//                                                delete_communication_out(my_id);
-//                                                dialog.cancel();
-//                                            }
-//                                        }
-//                                );
-//                                AlertDialog alert1 = builder.create();
-//                                alert1.show();
-//                            }
-//                            else if (resp==0){
-//                                r.stop();
-//                                progressDialog.dismiss();
-//                                android.support.v7.app.AlertDialog.Builder builder = new AlertDialog.Builder(UserActivity.this);
-//                                builder.setTitle("Call failed");
-//                                builder.setMessage(name_to+" was not responding");
-//                                builder.setCancelable(false);
-//                                builder.setPositiveButton(
-//                                        "okay",
-//                                        new DialogInterface.OnClickListener() {
-//                                            @Override
-//                                            public void onClick(DialogInterface dialog, int which) {
-//                                                delete_communication_in(id_to);
-//                                                delete_communication_out(my_id);
-//                                                dialog.cancel();
-//                                            }
-//                                        }
-//                                );
-//                                AlertDialog alert1 = builder.create();
-//                                alert1.show();
-//                            }
-//                        }
-//
-//                        @Override
-//                        public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-//
-//                        }
-//
-//                        @Override
-//                        public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-//
-//                        }
-//
-//                        @Override
-//                        public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//                        }
-//                    });
-//                }
-//            }, 15000);
-//        }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        },15000);
     }
 
     private void setup_UI_components() {
@@ -834,7 +752,6 @@ public class UserActivity extends AppCompatActivity implements
         AlertDialog alert1 = builder.create();
         alert1.show();
     }
-
 
     private void create_communication_out(String id_from, String id_to, String name_from, String name_to, String number_to) {
         DatabaseReference codbr = FirebaseDatabase.getInstance().getReference("out_comms");

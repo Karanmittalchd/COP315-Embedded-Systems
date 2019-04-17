@@ -84,7 +84,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 FirebaseAuth mAuth = FirebaseAuth.getInstance();
-                mAuth.signOut();
+                //mAuth.signOut();
                 //if user, sognout. if volunteer, set nss active status to false
                 //also remove fcm token
                 final String my_id = mAuth.getUid();
@@ -129,8 +129,9 @@ public class ProfileSettingsActivity extends AppCompatActivity {
 
                     }
                 });
-
+                mAuth.signOut();
                 Intent my_intent = new Intent(ProfileSettingsActivity.this, MainActivity.class);
+                my_intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(my_intent);
                 finish();
             }

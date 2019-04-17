@@ -41,16 +41,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class VolunteerVideoActivity extends AppCompatActivity{
+public class VolunteerVideoActivity extends FragmentActivity implements OnMapReadyCallback{
 //        extends FragmentActivity implements OnMapReadyCallback {
 
     private TextView in_name, in_number,in_url;
-//    private MapView mapView;
     private WebView webView;
     private ImageButton b_play, b_call, b_gps;
-//            , b_end;
-    private GoogleMap mGoogleMap;
-    private SupportMapFragment mapFrag;
+    private GoogleMap mMap;
+    private double in_lat, in_long;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +56,7 @@ public class VolunteerVideoActivity extends AppCompatActivity{
         setContentView(R.layout.activity_volunteer_video);
 
         set_UI_components();
-        ;
+
         final String my_id = FirebaseAuth.getInstance().getUid();
         final DatabaseReference cidbr = FirebaseDatabase.getInstance().getReference("in_comms");
         cidbr.child(my_id).addChildEventListener(new ChildEventListener() {
@@ -108,55 +106,43 @@ public class VolunteerVideoActivity extends AppCompatActivity{
             }
         });
 
+//        final String my_id = FirebaseAuth.getInstance().getUid();
+        DatabaseReference cindbr = FirebaseDatabase.getInstance().getReference("in_comms");
+        cindbr.child(my_id).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                CommunicationIn c_in = dataSnapshot.getValue(CommunicationIn.class);
+                final String from_id = c_in.getId_from();
+                DatabaseReference locdbr = FirebaseDatabase.getInstance().getReference("last_location");
+                locdbr.child(from_id).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        UserLocation ut = dataSnapshot.getValue(UserLocation.class);
+                        in_lat = ut.getLat();
+                        in_long = ut.getLon();
+                        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                                .findFragmentById(R.id.map2);
+                        mapFragment.getMapAsync(VolunteerVideoActivity.this);
+                    }
 
-//
-//        mapFrag=(SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.mapFragment);
-//        mapFrag.getMapAsync(this);
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-//        String id = FirebaseAuth.getInstance().getUid();
-//        DatabaseReference cidbr = FirebaseDatabase.getInstance().getReference("in_comms");
-//        cidbr.child(id).addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                CommunicationIn my_ci = dataSnapshot.getValue(CommunicationIn.class);
-//                in_name.setText(my_ci.getName_from());
-//                in_number.setText(my_ci.getNumber_from());
-////                vid_url = my_ci.getVid_url();
-//                String from_id = my_ci.getId_from();
-//                DatabaseReference locdbr = FirebaseDatabase.getInstance().getReference("last_location");
-//                locdbr.child(from_id).addListenerForSingleValueEvent(new ValueEventListener() {
-//                    @Override
-//                    public void onDataChange(@NonNull DataSnapshot dSnapshot) {
-//                        UserTracking ut = dSnapshot.getValue(UserTracking.class);
-//                        LatLng usrcoord = new LatLng(Double.parseDouble(ut.getLat()),Double.parseDouble(ut.getLng()));
-//                        Location usrloc = new Location("");
-//                        usrloc.setLatitude(Double.parseDouble(ut.getLat()));
-//                        usrloc.setLongitude(Double.parseDouble(ut.getLng()));
-//                        mGoogleMap.addMarker(new MarkerOptions()
-//                                                    .position(usrcoord)
-//                                                    .title("User").snippet("snippet")
-//                                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-//                        mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(usrcoord,12.0f));
-//                    }
-//
-//                    @Override
-//                    public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//                    }
-//                });
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//            }
-//        });
+                    }
+                });
+            }
 
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
         b_play.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                webView.bringToFront();
+                webView.setVisibility(View.VISIBLE);
+                webView.bringToFront();
 
                 webView.getSettings().setBuiltInZoomControls(true);
                 webView.getSettings().setDisplayZoomControls(false);
@@ -171,10 +157,8 @@ public class VolunteerVideoActivity extends AppCompatActivity{
         b_gps.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                webView.setVisibility(View.INVISIBLE);
 
-//                mGoogleMap.getUiSettings().setAllGesturesEnabled(true);
-                Intent my_intent = new Intent(VolunteerVideoActivity.this,MapsActivity.class);
-                startActivity(my_intent);
             }
         });
 
@@ -198,21 +182,17 @@ public class VolunteerVideoActivity extends AppCompatActivity{
             }
         });
 
-//        b_end.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                String id = FirebaseAuth.getInstance().getUid();
-//                DatabaseReference cidbr = FirebaseDatabase.getInstance().getReference("in_comms");
-//                cidbr.child(id).removeValue();
-//            }
-//        });
     }
-//
-//    @Override
-//    public void onMapReady(GoogleMap googleMap) {
-//        mGoogleMap = googleMap;
-//
-//    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        // Add a marker in Sydney and move the camera
+        LatLng loc = new LatLng(in_lat, in_long);
+        mMap.addMarker(new MarkerOptions().position(loc).title("Marker in Location"));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loc,16.0f));
+    }
 
     private void set_UI_components(){
         in_name = (TextView)findViewById(R.id.text_caller_name);
