@@ -5,11 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Picture;
-import android.graphics.drawable.PictureDrawable;
-import android.media.Image;
-import android.media.MediaMetadataRetriever;
-import android.net.Uri;
-import android.os.Build;
+import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -29,7 +25,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.util.HashMap;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class OCRPiActivity extends AppCompatActivity {
 
@@ -51,37 +50,73 @@ public class OCRPiActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(playing){
                     playing=false;
-                    tresult.bringToFront();
                     webView.stopLoading();;
 
                     Picture picture = webView.capturePicture();
                     Bitmap  b = Bitmap.createBitmap( picture.getWidth(),
                             picture.getHeight(), Bitmap.Config.ARGB_8888);
+                    Canvas c = new Canvas( b );
+                    picture.draw( c );
 
-                    webView.reload();
-
-                    TextRecognizer textRecognizer = new TextRecognizer.Builder(getApplicationContext()).build();
-                    if(!textRecognizer.isOperational())
-                    {
-                        playing = true;
-                        Toast.makeText(getApplicationContext(),"Could not get the Text",Toast.LENGTH_SHORT).show();
+                    String timeStamp =
+                            new SimpleDateFormat("yyyyMMdd_HHmmss",
+                                    Locale.getDefault()).format(new Date());
+                    String imageFileName = "IMG_" + timeStamp + "_";
+                    File storageDir =
+                            getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                    String imageFilePath="";
+                    try {
+                        File image = File.createTempFile(
+                                imageFileName,  /* prefix */
+                                ".jpg",         /* suffix */
+                                storageDir      /* directory */
+                        );
+                        imageFilePath = image.getAbsolutePath();
+                    } catch (IOException e) {
+                        Toast.makeText(OCRPiActivity.this, "Failed to create new img file", Toast.LENGTH_SHORT).show();
                     }
-                    else{
-                        Frame frame = new Frame.Builder().setBitmap(b).build();
-                        SparseArray<TextBlock> items = textRecognizer.detect(frame);
-                        StringBuilder sb = new StringBuilder();
-                        for(int i=0; i<items.size(); ++i){
-                            TextBlock myItem = items.valueAt(i);
-                            sb.append(myItem.getValue());
-                            sb.append("\n");
 
+                    if(!imageFileName.equals("")) {
+                        FileOutputStream fos = null;
+                        try {
+                            fos = new FileOutputStream(imageFilePath);
+                            if (fos != null) {
+                                b.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+//                                Toast.makeText(OCRPiActivity.this,"image saved",Toast.LENGTH_SHORT).show();
+                                fos.close();
+                                try {
+                                    File f = new File(imageFilePath);
+                                    Bitmap b_in = BitmapFactory.decodeStream(new FileInputStream(f));
+
+                                    TextRecognizer textRecognizer = new TextRecognizer.Builder(getApplicationContext()).build();
+                                    if(!textRecognizer.isOperational())
+                                    {
+                                        Toast.makeText(getApplicationContext(),"Could not get the Text",Toast.LENGTH_SHORT).show();
+                                    }
+                                    else{
+                                        Frame frame = new Frame.Builder().setBitmap(b_in).build();
+                                        SparseArray<TextBlock> items = textRecognizer.detect(frame);
+                                        StringBuilder sb = new StringBuilder();
+                                        for(int i=0; i<items.size(); ++i){
+                                            TextBlock myItem = items.valueAt(i);
+                                            sb.append(myItem.getValue());
+                                            sb.append("\n");
+                                        }
+                                        imageView.setVisibility(View.INVISIBLE);
+                                        tresult.setVisibility(View.VISIBLE);
+                                        tresult.bringToFront();
+//                                        Toast.makeText(OCRPiActivity.this,sb.toString(),Toast.LENGTH_SHORT).show();
+                                        tresult.setText("OCR Result: "+sb.toString());
+                                    }
+                                } catch (FileNotFoundException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        } catch (Exception e) {
+                            Toast.makeText(OCRPiActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
-                        imageView.setVisibility(View.INVISIBLE);
-                        tresult.setVisibility(View.VISIBLE);
-                        tresult.bringToFront();
-                        tresult.setText("OCR Result: "+sb.toString());
                     }
-
+                    webView.reload();
                     playing=true;
                 }
                 else{
@@ -101,33 +136,54 @@ public class OCRPiActivity extends AppCompatActivity {
                     Bitmap  b = Bitmap.createBitmap( picture.getWidth(),
                             picture.getHeight(), Bitmap.Config.ARGB_8888);
                     Canvas c = new Canvas( b );
-
                     picture.draw( c );
-                    FileOutputStream fos = null;
+
+                    String timeStamp =
+                            new SimpleDateFormat("yyyyMMdd_HHmmss",
+                                    Locale.getDefault()).format(new Date());
+                    String imageFileName = "IMG_" + timeStamp + "_";
+                    File storageDir =
+                            getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                    String imageFilePath="";
                     try {
-                        fos = new FileOutputStream( "mnt/sdcard/capture.jpg" );
-                        if ( fos != null )
-                        {
-                            b.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-                            Toast.makeText(OCRPiActivity.this,"image saved",Toast.LENGTH_SHORT).show();
-                            fos.close();
-                            try {
-                                File f=new File("mnt/sdcard/", "capture.jpg");
-                                Bitmap b_in = BitmapFactory.decodeStream(new FileInputStream(f));
-                                imageView.setVisibility(View.VISIBLE);
-                                tresult.setVisibility(View.INVISIBLE);
-                                imageView.bringToFront();
-                                imageView.setImageBitmap(b_in);
-                            }
-                            catch (FileNotFoundException e)
+                        File image = File.createTempFile(
+                                imageFileName,  /* prefix */
+                                ".jpg",         /* suffix */
+                                storageDir      /* directory */
+                        );
+
+                        imageFilePath = image.getAbsolutePath();
+                    } catch (IOException e) {
+                        Toast.makeText(OCRPiActivity.this, "Failed to create new img file", Toast.LENGTH_SHORT).show();
+                    }
+
+                    if(!imageFileName.equals("")){
+                        FileOutputStream fos = null;
+                        try {
+                            fos = new FileOutputStream( imageFilePath );
+                            if ( fos != null )
                             {
-                                e.printStackTrace();
+                                b.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                                Toast.makeText(OCRPiActivity.this,"image saved",Toast.LENGTH_SHORT).show();
+                                fos.close();
+                                try {
+                                    File f=new File(imageFilePath);
+                                    Bitmap b_in = BitmapFactory.decodeStream(new FileInputStream(f));
+                                    imageView.setVisibility(View.VISIBLE);
+                                    tresult.setVisibility(View.INVISIBLE);
+                                    imageView.bringToFront();
+                                    imageView.setImageBitmap(b_in);
+                                }
+                                catch (FileNotFoundException e)
+                                {
+                                    e.printStackTrace();
+                                }
                             }
                         }
-                    }
-                    catch( Exception e )
-                    {
-                        Toast.makeText(OCRPiActivity.this,e.getMessage(),Toast.LENGTH_SHORT).show();
+                        catch( Exception e )
+                        {
+                            Toast.makeText(OCRPiActivity.this,e.getMessage(),Toast.LENGTH_SHORT).show();
+                        }
                     }
                     webView.reload();
                     playing=true;
