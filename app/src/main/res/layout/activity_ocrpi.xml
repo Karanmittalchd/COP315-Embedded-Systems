@@ -4,20 +4,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/my_dark_grey"
     tools:context=".OCRPiActivity">
 
-    <ImageView
-        android:id="@+id/imageViewCapture"
+    <WebView
+        android:id="@+id/webView2"
         android:layout_width="395dp"
         android:layout_height="350dp"
         android:layout_marginStart="5dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="15dp"
         android:layout_marginEnd="5dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.199"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button_capture"
-        app:srcCompat="@android:color/darker_gray" />
+        app:layout_constraintTop_toTopOf="parent" />
+
 
     <Button
         android:id="@+id/button_capture"
@@ -43,15 +43,46 @@
         app:layout_constraintStart_toEndOf="@+id/button_capture"
         app:layout_constraintTop_toBottomOf="@+id/webView2" />
 
-    <WebView
-        android:id="@+id/webView2"
+    <Button
+        android:id="@+id/button_ocr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="20dp"
+        android:text="OCR"
+        app:layout_constraintEnd_toStartOf="@+id/button_stream"
+        app:layout_constraintStart_toEndOf="@+id/button_capture"
+        app:layout_constraintTop_toBottomOf="@+id/webView2" />
+
+    <ImageView
+        android:id="@+id/imageViewCapture"
         android:layout_width="395dp"
         android:layout_height="350dp"
         android:layout_marginStart="5dp"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="5dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.199"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/button_capture"
+        app:srcCompat="@android:color/darker_gray" />
+
+    <TextView
+        android:id="@+id/t_ocrresult"
+        android:layout_width="300dp"
+        android:layout_height="350dp"
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="100dp"
+        android:background="@color/my_off_white"
+        android:gravity="center_horizontal"
+        android:text="OCR Result:"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_capture" />
 
 </android.support.constraint.ConstraintLayout>
