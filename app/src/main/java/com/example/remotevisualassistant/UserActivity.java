@@ -470,7 +470,7 @@ public class UserActivity extends AppCompatActivity implements
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
-                                        b_edit.setBackgroundColor(getResources().getColor(R.color.my_bright_green));
+                                        b_edit.setBackgroundColor(getResources().getColor(R.color.my_off_white));
                                         b_edit.setText("Edit");
                                         edit_flag = false;
                                         update_device_status();
@@ -507,7 +507,7 @@ public class UserActivity extends AppCompatActivity implements
                     staus_heading.setVisibility(View.VISIBLE);
                     dev_ip.setVisibility(View.INVISIBLE);
                     b_device.setVisibility(View.INVISIBLE);
-                    b_edit.setBackgroundColor(getResources().getColor(R.color.my_bright_green));
+                    b_edit.setBackgroundColor(getResources().getColor(R.color.my_dark_grey));
                     b_edit.setText("Edit");
                     edit_flag = false;
                 }
@@ -609,7 +609,7 @@ public class UserActivity extends AppCompatActivity implements
                             r.stop();
                             progressDialog.dismiss();
                             Intent my_intent = new Intent(UserActivity.this, UserCallActivity.class);
-                            startActivity(my_intent);
+                                startActivity(my_intent);
                             finish();
                         }
                         else if (myco.getWaiting()==2){
@@ -673,13 +673,13 @@ public class UserActivity extends AppCompatActivity implements
                 UserDetails ud = dataSnapshot.getValue(UserDetails.class);
                 if (ud.isSet()) {
                     dev_hd.setText("Device details");
-                    dev_hd.setTextColor(getResources().getColor(R.color.my_bright_green));
+                    dev_hd.setTextColor(getResources().getColor(R.color.myMain));
                     dev_ip.setVisibility(View.INVISIBLE);
                     b_device.setVisibility(View.INVISIBLE);
                     dev_status.setVisibility(View.VISIBLE);
                     staus_heading.setVisibility(View.VISIBLE);
                     dev_status.setText("Logged-in to IP: " + ud.getDevice_ip());
-                    dev_status.setTextColor(getResources().getColor(R.color.my_bright_green));
+                    dev_status.setTextColor(getResources().getColor(R.color.myMain));
                 } else {
                     dev_hd.setText("Device not paired");
                     dev_hd.setTextColor(getResources().getColor(R.color.my_bright_red));

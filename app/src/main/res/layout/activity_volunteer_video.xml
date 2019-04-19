@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/my_dark_grey"
+    android:background="@color/colorPrimary"
     tools:context=".VolunteerVideoActivity">
 
     <TextView
@@ -131,52 +131,42 @@
         app:layout_constraintTop_toBottomOf="@id/divider9"
         tools:context=".VolunteerVideoActivity" />
 
-    <ImageButton
+    <Button
         android:id="@+id/imageButton_play"
         android:layout_width="100dp"
         android:layout_height="45dp"
         android:layout_marginStart="40dp"
         android:layout_marginBottom="25dp"
-        android:background="@color/my_light_blue"
+        android:background="@color/myMain"
+        android:text="Play"
+        android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/ic_play" />
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <ImageButton
+    <Button
         android:id="@+id/imageButton_call"
         android:layout_width="100dp"
         android:layout_height="45dp"
         android:layout_marginStart="15dp"
         android:layout_marginEnd="15dp"
         android:layout_marginBottom="25dp"
-        android:background="@color/my_light_blue"
+        android:background="@color/myMain"
+        android:text="Call"
+        android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/imageButton_gps"
-        app:layout_constraintStart_toEndOf="@+id/imageButton_play"
-        app:srcCompat="@drawable/ic_call" />
+        app:layout_constraintStart_toEndOf="@+id/imageButton_play" />
 
-    <ImageButton
+    <Button
         android:id="@+id/imageButton_gps"
         android:layout_width="100dp"
         android:layout_height="45dp"
         android:layout_marginEnd="40dp"
         android:layout_marginBottom="25dp"
-        android:background="@color/my_light_blue"
+        android:background="@color/myMain"
+        android:text="GPS"
+        android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/ic_location" />
-
-    <!--<com.google.android.gms.maps.MapView-->
-        <!--android:id="@+id/mapFragment"-->
-        <!--android:layout_width="0dp"-->
-        <!--android:layout_height="485dp"-->
-        <!--android:layout_marginStart="15dp"-->
-        <!--android:layout_marginTop="15dp"-->
-        <!--android:layout_marginEnd="15dp"-->
-        <!--app:layout_constraintEnd_toEndOf="parent"-->
-        <!--app:layout_constraintStart_toStartOf="parent"-->
-        <!--app:layout_constraintTop_toBottomOf="@+id/divider9"/>-->
-        <!--class="com.google.a8ndroid.gms.maps.MapFragment"/>-->
-
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.MediaController;
 import android.widget.TextView;
@@ -46,7 +47,7 @@ public class VolunteerVideoActivity extends FragmentActivity implements OnMapRea
 
     private TextView in_name, in_number,in_url;
     private WebView webView;
-    private ImageButton b_play, b_call, b_gps;
+    private Button b_play, b_call, b_gps;
     private GoogleMap mMap;
     private double in_lat, in_long;
 
@@ -201,9 +202,9 @@ public class VolunteerVideoActivity extends FragmentActivity implements OnMapRea
         //videoView = (VideoView)findViewById(R.id.videoView);
 //        mapView = (MapView)findViewById(R.id.mapView);
         webView = (WebView)findViewById(R.id.webView);
-        b_play = (ImageButton)findViewById(R.id.imageButton_play);
-        b_call = (ImageButton)findViewById(R.id.imageButton_call);
-        b_gps = (ImageButton)findViewById(R.id.imageButton_gps);
+        b_play = (Button) findViewById(R.id.imageButton_play);
+        b_call = (Button) findViewById(R.id.imageButton_call);
+        b_gps = (Button) findViewById(R.id.imageButton_gps);
 //        b_end =(ImageButton)findViewById(R.id.imageButton_end);
 
         String id = FirebaseAuth.getInstance().getUid();

@@ -13,7 +13,6 @@ import android.widget.TextView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.EmailAuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -143,7 +142,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         role = (TextView)findViewById(R.id.t2_role);
         number = (TextView)findViewById(R.id.t3_number);
         name = (TextView)findViewById(R.id.t4_name);
-        oldp = (EditText)findViewById(R.id.old_p);
+        oldp = (EditText)findViewById(R.id.old_pd);
         newp1 = (EditText)findViewById(R.id.new_p1);
         newp2 = (EditText)findViewById(R.id.new_p2);
         b_update = (Button)findViewById(R.id.button_upd_p);

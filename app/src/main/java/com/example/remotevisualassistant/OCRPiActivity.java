@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Picture;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,6 +21,12 @@ import android.widget.Toast;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,6 +44,7 @@ public class OCRPiActivity extends AppCompatActivity {
     private WebView webView;
     private TextView tresult;
     boolean playing;
+    private String vid_url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +115,7 @@ public class OCRPiActivity extends AppCompatActivity {
                                         tresult.bringToFront();
 //                                        Toast.makeText(OCRPiActivity.this,sb.toString(),Toast.LENGTH_SHORT).show();
                                         tresult.setText("OCR Result: "+sb.toString());
+                                        f.delete();
                                     }
                                 } catch (FileNotFoundException e) {
                                     e.printStackTrace();
@@ -198,7 +207,7 @@ public class OCRPiActivity extends AppCompatActivity {
         b_stream.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String vid_url = "http://10.194.105.20:8081";
+                //String vid_url = "http://192.168.225.34:8081";
                 webView.getSettings().setBuiltInZoomControls(true);
                 webView.getSettings().setDisplayZoomControls(false);
                 webView.getSettings().setLoadWithOverviewMode(true);
@@ -219,6 +228,22 @@ public class OCRPiActivity extends AppCompatActivity {
 
         imageView.setVisibility(View.INVISIBLE);
         tresult.setVisibility(View.INVISIBLE);
+
+        String id = FirebaseAuth.getInstance().getUid();
+        DatabaseReference mydbr = FirebaseDatabase.getInstance().getReference("userdetails");
+        mydbr.child(id).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                UserDetails ud = dataSnapshot.getValue(UserDetails.class);
+                vid_url = "http://"+ud.getDevice_ip();
+                Toast.makeText(OCRPiActivity.this, vid_url, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(OCRPiActivity.this, "Unable to retrieve device", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void build_an_alert(String t, String m, String b){
