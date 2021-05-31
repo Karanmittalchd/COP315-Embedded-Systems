@@ -1,4 +1,4 @@
-
+# COP315: Embedded Systems Design Project
 - Designed a prototype to assist visually impaired people in navigating themselves using Raspberry Pi, Pi camera
 - Developed an Android app for interaction via live video streaming (Motion Library) & GPS (Google Maps API)
 - Incorporated features like face detection (OpenCV library) and OCR (Tesseract library) in the application
